@@ -95,7 +95,7 @@ class BaseTask(BaseModel):
 
 
 class CrawlTask(BaseTask):
-    url = models.URLField(max_length=200, validators=[URLValidator], default=None)
+    url = models.URLField(max_length=300, validators=[URLValidator], default=None)
 
     @staticmethod
     def __parse_url__(url):
