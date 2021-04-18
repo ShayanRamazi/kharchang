@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'tsetmc.apps.TsetmcConfig',
     'core.apps.CoreConfig',
     'rest_framework',
+    'ifb.apps.IfbConfig'
 ]
 
 MIDDLEWARE = [

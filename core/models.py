@@ -6,6 +6,10 @@ from django.core.validators import URLValidator
 from django.db import models
 from django.contrib.auth.models import User
 
+import logging
+
+django_logger = logging.getLogger(__name__)
+
 
 class BaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -51,6 +55,8 @@ class BaseTask(BaseModel):
         return 1 if successful and 0 otherwise
         returns -1 if task has state DONE or ERROR
         """
+        django_logger.info(
+            "job started:" + str(self.id) + ":" + (self.description if self.description else "no description"))
         if self.state == self.STATE_DONE or self.state == self.STATE_ERROR:
             return -1
         self.started_at = datetime.today()
@@ -120,14 +126,18 @@ class CrawlTask(BaseTask):
         2- a function which imports returned json to the database using django model
         """
         try:
+            django_logger.info("parse_url started:" + str(self.id) + ":" + (
+                self.description if self.description else "no description"))
             parsed_data = self.__parse_url__(self.url)
         except Exception as e:
             print(e)
             parsed_data = 0
-        if parsed_data != 1:
+        if not parsed_data:
             flag = 0
         else:
             try:
+                django_logger.info("data insertion started:" + str(self.id) + ":" + (
+                    self.description if self.description else "no description"))
                 insertion_result = self.__insert_data_to_database__(parsed_data)
             except Exception as e:
                 print(e)

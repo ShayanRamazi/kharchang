@@ -1,14 +1,15 @@
 import datetime
 from unittest import TestCase
 
-from core.utils import parse_simple_jalali_date, add_month_to_jalali_string, georgian_to_simple_jalali_string
+from core.utils import parse_simple_jalali_date, add_month_to_jalali_string, georgian_to_simple_jalali_string, \
+    get_first_number_from_string
 
 
 class JalaliDateUtilsTest(TestCase):
 
     def test_parse_simple_jalali_date(self):
         someday_jalali_date_string = "1400/01/25"
-        someday = datetime.datetime(2021, 4, 14)
+        someday = datetime.date(2021, 4, 14)
         date = parse_simple_jalali_date(someday_jalali_date_string)
         self.assertEqual(someday, date)
 
@@ -41,3 +42,46 @@ class JalaliDateUtilsTest(TestCase):
         someday = datetime.datetime(2021, 4, 14)
         date_string = georgian_to_simple_jalali_string(someday)
         self.assertEqual(date_string, someday_jalali_date_string)
+
+
+class StringManipulationTest(TestCase):
+
+    def test_get_first_number_from_string(self):
+        string_1 = "salam123khodahafez2"
+        number_1 = 123
+        self.assertEqual(number_1, get_first_number_from_string(string_1))
+        string_2 = "123"
+        number_2 = 123
+        self.assertEqual(number_2, get_first_number_from_string(string_2))
+        string_3 = "123.123"
+        number_3 = 123.123
+        self.assertEqual(number_3, get_first_number_from_string(string_3))
+        string_4 = "6ماه"
+        number_4 = 6
+        self.assertEqual(number_4, get_first_number_from_string(string_4))
+        string_5 = "0 ماه"
+        number_5 = 0
+        self.assertEqual(number_5, get_first_number_from_string(string_5))
+        string_6 = "20%"
+        number_6 = 20
+        self.assertEqual(number_6, get_first_number_from_string(string_6))
+        string_7 = "1,000,000"
+        number_7 = 1000000
+        self.assertEqual(number_7, get_first_number_from_string(string_7))
+        string_8 = "salam 123/123"
+        number_8 = 123.123
+        self.assertEqual(number_8, get_first_number_from_string(string_8))
+        string_9 = "0123"
+        number_9 = 123
+        self.assertEqual(number_9, get_first_number_from_string(string_9))
+        string_10 = "43/56"
+        number_10 = 43.56
+        self.assertEqual(number_10, get_first_number_from_string(string_10))
+        string_11 = "1400/13/12"
+        number_11 = 1400.13
+        self.assertEqual(number_11, get_first_number_from_string(string_11))
+        string_12 = "salam"
+        self.assertRaises(ValueError, get_first_number_from_string, string_12)
+        string_13 = ".123"
+        number_13 = 0.123
+        self.assertEqual(number_13, get_first_number_from_string(string_13))
