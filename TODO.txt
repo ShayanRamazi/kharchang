@@ -1,0 +1,6 @@
+TODO: Write some background job to execute waiting jobs with start time reached
+TODO: Write some periodic tasks
+TODO: Admin pages for tasks
+TODO: API documentation
+TODO: Task for update IFB.
+مثال: اخزا۹۱۵ ابتدا به صورت اخزا۹۱۵۱ خوانده می‌شود. بعدا باید اسم آن آپدیت شود.

@@ -13,7 +13,8 @@ from core.utils import parse_simple_jalali_date, georgian_to_simple_jalali_strin
 
 from django_mysql.models import ListCharField, ListTextField
 
-from ifb.utils import get_url, get_table_data_by_keys, add_key_values_to_dict, get_table_data_by_ids, get_fbid_from_url
+from ifb.utils import get_url, get_table_data_by_keys, add_key_values_to_dict, get_table_data_by_ids, get_fbid_from_url, \
+    post_by_payload
 
 import logging
 
@@ -285,11 +286,12 @@ class IFBCrawlTask(CrawlTask):
             values = []
             session = requests.Session()
             temp_url = base_url + str(instrument_data["fbid"])
-            my_session = session.get(temp_url)
-            parsed_session = BeautifulSoup(my_session.text, "html.parser")
-            viewstate_tag = parsed_session.find('input', attrs={"type": "hidden"})
-            payload[viewstate_tag['name']] = viewstate_tag['value']
-            excel_resp = session.post(temp_url, payload)
+            # my_session = session.get(temp_url)
+            # parsed_session = BeautifulSoup(my_session.text, "html.parser")
+            # viewstate_tag = parsed_session.find('input', attrs={"type": "hidden"})
+            # payload[viewstate_tag['name']] = viewstate_tag['value']
+            # excel_resp = session.post(temp_url, payload)
+            excel_resp = post_by_payload(temp_url, payload)
             parsed_excel_data = BeautifulSoup(excel_resp.text, "html.parser")
             table_rows = parsed_excel_data.find_all("tr")
             for table_row in table_rows[1:][::direction]:

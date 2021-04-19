@@ -2,7 +2,7 @@ from datetime import datetime
 from django.test import TestCase
 
 from core.models import CrawlTask, TestSuccessCrawlTask
-from .tasks import run_single_time_task
+from core.tasks import run_single_time_task
 
 
 class SimpleTaskTest(TestCase):

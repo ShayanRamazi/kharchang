@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from core.models import BaseTask
 from kharchang.celery import app as celery
 from celery.utils.log import get_task_logger
+from celery.schedules import crontab
 from django.apps import apps
 
 logger = get_task_logger(__name__)
@@ -38,3 +39,16 @@ def run_single_time_task(task_id, task_class_name):
         return 0
     else:
         raise ValueError("Task run should return -1,0 or 1")
+
+
+# @celery.task(name="check_task")
+# def check():
+#     print('I am checking your stuff')
+#
+#
+# celery.conf.beat_schedule = {
+#     'run-me-every-ten-seconds': {
+#         'task': 'check_task',
+#         'schedule': 10.0
+#     }
+# }
