@@ -43,6 +43,7 @@ celery.conf.beat_schedule = {
     'IFB daily crawl akhzas and arads': {
         'task': 'ifb_daily_crawl_task',
         # 'schedule': crontab(hour='7, 8, 9, 12, 23', minute='0,30')
-        'schedule': crontab(hour='13', minute='18')
+        # 'schedule': crontab(hour='13', minute='18')
+        'schedule': crontab(hour='14, 18', minute='12, 42')
     }
 }
