@@ -5,8 +5,7 @@ Linux:
 https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
 
 sudo systemctl start mongod
-sudo systemctl status mongod
-sudo systemctl stop mongod
+sudo systemctl status mongods
 sudo systemctl restart mongod
 
 MacOS:
@@ -21,6 +20,8 @@ simple: mongod --config /usr/local/etc/mongod.conf
 brew services start postgresql
 
 **Redis:**
+
+redis-cli ping
 
 Linux:
 
