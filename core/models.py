@@ -49,6 +49,7 @@ class BaseTask(BaseModel):
     description = models.CharField(max_length=200, null=True, blank=True, default=None)
     retried = models.SmallIntegerField(null=True, blank=True, default=0)
     max_retry = models.SmallIntegerField(default=2, null=False, blank=False)
+    error_message = models.TextField(null=True, blank=True)
 
     def run(self):
         """
@@ -66,6 +67,7 @@ class BaseTask(BaseModel):
         try:
             flag = self.__run__()
         except Exception as e:
+            self.error_message = str(e)
             flag = 0
         # if flag != 0 and flag != 1:
         #     raise ValueError("__run__ method should just return 0 or 1 values")
@@ -82,7 +84,7 @@ class BaseTask(BaseModel):
 
     def __run__(self):
         """
-        Should return 1 if successful and 0 otherwise
+        Should return 1 if successful and raises error otherwise
         """
         pass
 
@@ -101,13 +103,15 @@ class BaseTask(BaseModel):
 
 
 class CrawlTask(BaseTask):
+    ERROR_MESSAGE_INSERTION_ERROR = "Insertion to database not done successfully"
+    ERROR_MESSAGE_PARSE_ERROR = "Parsing data failed"
     url = models.URLField(max_length=300, validators=[URLValidator], default=None)
 
     @staticmethod
     def __parse_url__(url):
         """
-        returning data in self.url as a json
-        if error occurred return 0
+        returning a tuple of parsed data and success state
+        if error occurred success value should be 0 or function must raise error
         """
         pass
 
@@ -115,7 +119,7 @@ class CrawlTask(BaseTask):
     def __insert_data_to_database__(json_data):
         """
         Using json returned by parse_url method to insert useful data into app models
-        if error occurred return 0 else return 1
+        if error occurred return 0 or raise error else return 1
         """
         pass
 
@@ -125,28 +129,17 @@ class CrawlTask(BaseTask):
         1- parse url which parses the url and returns a json of data
         2- a function which imports returned json to the database using django model
         """
-        try:
-            django_logger.info("parse_url started:" + str(self.id) + ":" + (
-                self.description if self.description else "no description"))
-            parsed_data = self.__parse_url__(self.url)
-        except Exception as e:
-            print(e)
-            parsed_data = 0
-        if not parsed_data:
-            flag = 0
-        else:
-            try:
-                django_logger.info("data insertion started:" + str(self.id) + ":" + (
-                    self.description if self.description else "no description"))
-                insertion_result = self.__insert_data_to_database__(parsed_data)
-            except Exception as e:
-                print(e)
-                insertion_result = 0
-            if insertion_result != 0 and insertion_result != 1:
-                flag = 0
-            else:
-                flag = insertion_result
-        return flag
+        django_logger.info("parse_url started:" + str(self.id) + ":" + (
+            self.description if self.description else "no description"))
+        parsed_data, success = self.__parse_url__(self.url)
+        if success != 1:
+            raise RuntimeError(self.ERROR_MESSAGE_PARSE_ERROR)
+        django_logger.info("data insertion started:" + str(self.id) + ":" + (
+            self.description if self.description else "no description"))
+        insertion_result = self.__insert_data_to_database__(parsed_data)
+        if insertion_result != 1:
+            raise RuntimeError(self.ERROR_MESSAGE_INSERTION_ERROR)
+        return insertion_result
 
 
 #################################################
@@ -208,7 +201,7 @@ class TestSuccessCrawlTask(TestCrawlTask):
 
     @staticmethod
     def __parse_url__(url):
-        return 1
+        return {}, 1
 
     @staticmethod
     def __insert_data_to_database__(json_data):
@@ -222,7 +215,7 @@ class TestParseFailInsertSuccessCrawlTask(TestCrawlTask):
 
     @staticmethod
     def __parse_url__(url):
-        return 0
+        return {}, 0
 
     @staticmethod
     def __insert_data_to_database__(json_data):
@@ -236,7 +229,7 @@ class TestParseSuccessInsertFailCrawlTask(TestCrawlTask):
 
     @staticmethod
     def __parse_url__(url):
-        return 1
+        return {}, 1
 
     @staticmethod
     def __insert_data_to_database__(json_data):
@@ -250,7 +243,7 @@ class TestParseSuccessInsertBadValueCrawlTask(TestCrawlTask):
 
     @staticmethod
     def __parse_url__(url):
-        return 1
+        return {}, 1
 
     @staticmethod
     def __insert_data_to_database__(json_data):
@@ -264,7 +257,7 @@ class TestParseSuccessInsertRaiseErrorCrawlTask(TestCrawlTask):
 
     @staticmethod
     def __parse_url__(url):
-        return 1
+        return {}, 1
 
     @staticmethod
     def __insert_data_to_database__(json_data):

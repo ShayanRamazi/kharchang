@@ -39,3 +39,4 @@ brew services stop redis
 
 celery -A kharchang.celery worker --loglevel=info
 celery -A kharchang.celery beat --loglevel=info
+celery -A kharchang.celery purge

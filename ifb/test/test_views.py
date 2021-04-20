@@ -18,7 +18,7 @@ class IFBOneTimeTaskAPITest(TestCase):
 
     def test_task_added(self):
         response = client.post(reverse('ifb_add_one_time_tasks'),
-                               data={"tasks": [{'url': 'https://google.com', 'max_retry': 3}]}
+                               data={"tasks": [{'url': 'https://farsnews.com', 'max_retry': 3}]}
                                , content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # get data from db

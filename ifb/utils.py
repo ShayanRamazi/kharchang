@@ -36,10 +36,12 @@ def get_table_data_by_ids(table_html, id_map):
     for key in id_map.keys():
         item = id_map[key]
         val = ifb_td_get_value_by_span_id(item["id"], table_html)
-        if item["type"] == "numeric":
+        if item["type"] == "numeric" and val is not None:
             val = get_first_number_from_string(val)
-        elif item["type"] == "date":
+        elif item["type"] == "date" and val is not None:
             val = parse_simple_jalali_date(val)
+        if val is None and "default" in item.keys():
+            val = item["default"]
         values.append(val)
     return values
 
@@ -97,14 +99,16 @@ def get_akhza_list_from_ifb_site():
         links = main_table.find_all("a")
         if not links or len(links) == 0:
             break
-        if len(links) > number_in_page:
-            links = links[:number_in_page]
+        # if len(links) > number_in_page:
+        #     links = links[:number_in_page]
         for link in links:
-            fbid = get_fbid_from_url(link['href'])
-            akhza_list.append({
-                'fbid': fbid,
-                'url': base_url + str(fbid)
-            })
+            href = link['href']
+            if ".aspx?id=" in href.lower():
+                fbid = get_fbid_from_url(link['href'])
+                akhza_list.append({
+                    'fbid': fbid,
+                    'url': base_url + str(fbid)
+                })
     return akhza_list
 
 

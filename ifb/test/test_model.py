@@ -71,6 +71,8 @@ arad_data_dict = {
 
 total_dates = (arad_data_dict["settlementDate"] - arad_data_dict["publishDate"]).days + 1
 one_day = datetime.timedelta(days=1)
+
+
 for i in range(total_dates):
     arad_data_dict["paymentDetailsDates"].append(
         georgian_to_simple_jalali_string(arad_data_dict["publishDate"] + i * one_day))
@@ -166,6 +168,18 @@ class IFBCrawlTaskTest(TestCase):
         res = akhza812_crawl_task.run()
         self.assertEqual(res, 1)
         self.assertEqual(IFBInstrument.objects.filter(fbid=24297).count(), 1)
+
+    def test_successful_akhza_2(self):
+        akhza1_crawl_task = IFBCrawlTask(url="https://www.ifb.ir/Instrumentsmfi.aspx?id=21783")
+        res = akhza1_crawl_task.run()
+        self.assertEqual(res, 1)
+        self.assertEqual(IFBInstrument.objects.filter(fbid=21783).count(), 1)
+
+    def test_successful_akhza_3(self):
+        akhza911_crawl_task = IFBCrawlTask(url="https://www.ifb.ir/Instrumentsmfi.aspx?id=25368")
+        res = akhza911_crawl_task.run()
+        self.assertEqual(res, 1)
+        self.assertEqual(IFBInstrument.objects.filter(fbid=25368).count(), 1)
 
     def test_error_url(self):
         ifb_crawl_task = IFBCrawlTask(url="https://www.ifb.ir/ytm.aspx")

@@ -4,3 +4,5 @@ TODO: Admin pages for tasks
 TODO: API documentation
 TODO: Task for update IFB.
 مثال: اخزا۹۱۵ ابتدا به صورت اخزا۹۱۵۱ خوانده می‌شود. بعدا باید اسم آن آپدیت شود.
+TODO: Complete ifb test cases
+TODO: Celery time zone

@@ -25,28 +25,29 @@ class IFBInstrument(BaseModel):
     fbid = models.CharField(max_length=10, unique=True)
     ifbUrl = models.URLField(max_length=300, validators=[URLValidator], unique=True)
     symbolFa = models.CharField(max_length=50)
-    companyFa = models.CharField(max_length=100)
+    companyFa = models.CharField(max_length=100, null=True, blank=True)
     mnemonic = models.CharField(max_length=50)
-    companyEn = models.CharField(max_length=100)
+    companyEn = models.CharField(max_length=100, null=True, blank=True)
     isin = models.CharField(max_length=50, unique=True)
     market = models.CharField(max_length=50, null=True, blank=True)
     industry = models.CharField(max_length=50, null=True, blank=True)
-    subIndustry = models.CharField(max_length=50)
+    subIndustry = models.CharField(max_length=50, null=True, blank=True)
     parValue = models.IntegerField()
-    totalCount = models.IntegerField()
-    listedCount = models.IntegerField()
+    totalCount = models.IntegerField(null=True, blank=True)
+    listedCount = models.IntegerField(null=True, blank=True)
     settlementDate = models.DateField()
     publishDate = models.DateField()
     duration = models.SmallIntegerField()
     subject = models.CharField(max_length=100)
     nominalReturnRate = models.SmallIntegerField()
     couponPeriod = models.SmallIntegerField()
-    issuer = models.CharField(max_length=200)
+    issuer = models.CharField(max_length=200, null=True, blank=True)
     underWriter = models.CharField(max_length=200, null=True, blank=True)
-    guarantor = models.CharField(max_length=200)
-    profitDistributionAgent = models.CharField(max_length=200)
+    guarantor = models.CharField(max_length=200, null=True, blank=True)
+    profitDistributionAgent = models.CharField(max_length=200, null=True, blank=True)
     saleAgent = models.CharField(max_length=200, null=True, blank=True)
     marketMaker = models.CharField(max_length=200, null=True, blank=True)
+    trustee = models.CharField(max_length=200, null=True, blank=True)
     originator = models.CharField(max_length=200, null=True, blank=True)
     profitDistributionDates = ListCharField(
         base_field=models.CharField(max_length=10),
@@ -222,7 +223,8 @@ class IFBCrawlTask(CrawlTask):
             },
             "nominalReturnRate": {
                 "id": "ContentPlaceHolder1_Label3",
-                "type": "numeric"
+                "type": "numeric",
+                "default": 0,
             },
             "totalCount": {
                 "id": "ContentPlaceHolder1_Label4",
@@ -238,7 +240,8 @@ class IFBCrawlTask(CrawlTask):
             },
             "couponPeriod": {
                 "id": "ContentPlaceHolder1_Label16",
-                "type": "numeric"
+                "type": "numeric",
+                "default": 0,
             },
             "duration": {
                 "id": "ContentPlaceHolder1_lblOragh",
@@ -271,6 +274,10 @@ class IFBCrawlTask(CrawlTask):
             },
             "marketMaker": {
                 "id": "ContentPlaceHolder1_lblBazargardan",
+                "type": "string"
+            },
+            "trustee": {
+                "id": "ContentPlaceHolder1_Label11",
                 "type": "string"
             },
             "saleAgent": {
@@ -335,7 +342,7 @@ class IFBCrawlTask(CrawlTask):
             instrument_data["paymentDetailsDates"] = []
             instrument_data["paymentDetailsValues"] = []
 
-        return instrument_data
+        return instrument_data, 1
 
     @staticmethod
     def __insert_data_to_database__(json_data):
