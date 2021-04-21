@@ -153,20 +153,27 @@ class CrawlTaskTest(TestCase):
         )
         task.run()
         self.assertEqual(task.state, task.STATE_QUEUED)
+        self.assertEqual(task.error_message, task.ERROR_MESSAGE_PARSE_ERROR)
         task.run()
         self.assertEqual(task.state, task.STATE_ERROR)
+        self.assertEqual(task.error_message, task.ERROR_MESSAGE_PARSE_ERROR)
         res = task.run()
         self.assertEqual(res, -1)
 
     def test_run_parse_success_insertion_fail(self):
         task = TestParseSuccessInsertFailCrawlTask(
             url="google.com",
-            max_retry=2
+            max_retry=3
         )
         task.run()
         self.assertEqual(task.state, task.STATE_QUEUED)
+        self.assertEqual(task.error_message, task.ERROR_MESSAGE_INSERTION_ERROR)
+        task.run()
+        self.assertEqual(task.state, task.STATE_QUEUED)
+        self.assertEqual(task.error_message, task.ERROR_MESSAGE_INSERTION_ERROR)
         task.run()
         self.assertEqual(task.state, task.STATE_ERROR)
+        self.assertEqual(task.error, task.ERROR_MESSAGE_INSERTION_ERROR)
         res = task.run()
         self.assertEqual(res, -1)
 

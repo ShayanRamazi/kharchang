@@ -5,8 +5,7 @@ Linux:
 https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
 
 sudo systemctl start mongod
-sudo systemctl status mongod
-sudo systemctl stop mongod
+sudo systemctl status mongods
 sudo systemctl restart mongod
 
 MacOS:
@@ -22,6 +21,8 @@ brew services start postgresql
 
 **Redis:**
 
+redis-cli ping
+
 Linux:
 
 https://redis.io/topics/quickstart
@@ -35,9 +36,8 @@ https://gist.github.com/tomysmile/1b8a321e7c58499ef9f9441b2faa0aa8
 brew services start redis
 brew services stop redis
 
+**Celery**
 
-**Dajngo Dynamic Scrapper**
-
-https://django-dynamic-scraper.readthedocs.io/
-
-pip install django-dynamic-scraper
+celery -A kharchang.celery worker --loglevel=info
+celery -A kharchang.celery beat --loglevel=info
+celery -A kharchang.celery purge

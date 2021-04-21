@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'tsetmc.apps.TsetmcConfig',
     'core.apps.CoreConfig',
     'rest_framework',
+    'ifb.apps.IfbConfig'
 ]
 
 MIDDLEWARE = [
@@ -158,3 +159,4 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 BROKER_BACKEND = 'memory'
+# CELERY_TIMEZONE = 'Asia/Tehran'
