@@ -44,6 +44,6 @@ celery.conf.beat_schedule = {
         'task': 'ifb_daily_crawl_task',
         # 'schedule': crontab(hour='7, 8, 9, 12, 23', minute='0,30')
         # 'schedule': crontab(hour='13', minute='18')
-        'schedule': crontab(hour='14, 18', minute='12, 42')
+        'schedule': crontab(hour='22, 17', minute='6, 37')
     }
 }
