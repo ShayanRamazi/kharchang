@@ -51,14 +51,14 @@ class IFBInstrument(BaseModel):
     originator = models.CharField(max_length=200, null=True, blank=True)
     profitDistributionDates = ListCharField(
         base_field=models.CharField(max_length=10),
-        size=40,
-        max_length=(40 * 11),
+        size=100,
+        max_length=(100 * 11),
         null=True, blank=True
     )
     profitDistributionValues = ListCharField(
         base_field=models.CharField(max_length=12),
-        size=40,
-        max_length=(40 * 13),
+        size=100,
+        max_length=(100 * 13),
         null=True, blank=True
     )
     paymentDetailsDates = ListTextField(
