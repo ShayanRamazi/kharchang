@@ -45,3 +45,7 @@ def insert_list_to_database(entity_list):
     for entity in entity_list:
         entity.full_clean()
         entity.save()
+
+
+def get_georgian_date_as_string_without_separator(date):
+    return str(date.year) + str(date.month).zfill(2) + str(date.day).zfill(2)

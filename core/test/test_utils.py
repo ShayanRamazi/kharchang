@@ -2,7 +2,7 @@ import datetime
 from unittest import TestCase
 
 from core.utils import parse_simple_jalali_date, add_month_to_jalali_string, georgian_to_simple_jalali_string, \
-    get_first_number_from_string
+    get_first_number_from_string, get_georgian_date_as_string_without_separator
 
 
 class JalaliDateUtilsTest(TestCase):
@@ -20,6 +20,13 @@ class JalaliDateUtilsTest(TestCase):
 
         bad_jalali_date_string = "1400/13/13"
         self.assertRaises(ValueError, parse_simple_jalali_date, bad_jalali_date_string)
+
+
+    def test_get_georgian_date_as_string_without_separator(self):
+        someday = datetime.date(2021, 4, 14)
+        someday_string_without_separator = '20210414'
+        date_string = get_georgian_date_as_string_without_separator(someday)
+        self.assertEqual(someday_string_without_separator, date_string)
 
     def test_add_month_to_jalali_string(self):
         day1 = '1399/12/12'
