@@ -39,3 +39,9 @@ def get_first_number_from_string(string):
     if len(temp_list) == 0:
         raise ValueError("string has no number in it")
     return float(temp_list[0])
+
+
+def insert_list_to_database(entity_list):
+    for entity in entity_list:
+        entity.full_clean()
+        entity.save()
