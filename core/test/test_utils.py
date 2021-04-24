@@ -13,6 +13,11 @@ class JalaliDateUtilsTest(TestCase):
         date = parse_simple_jalali_date(someday_jalali_date_string)
         self.assertEqual(someday, date)
 
+        someday_jalali_date_string_2 = "1400/2/4"
+        someday_2 = datetime.date(2021, 4, 24)
+        date = parse_simple_jalali_date(someday_jalali_date_string_2)
+        self.assertEqual(someday_2, date)
+
         bad_jalali_date_string = "1400/13/13"
         self.assertRaises(ValueError, parse_simple_jalali_date, bad_jalali_date_string)
 

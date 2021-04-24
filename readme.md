@@ -42,3 +42,11 @@ celery -A kharchang.celery worker --loglevel=info
 celery -A kharchang.celery beat --loglevel=info
 
 celery -A kharchang.celery purge
+
+celery -A kharchang.celery control shutdown
+
+
+pkill -f "celery beat"
+pkill -f "celery worker"
+nohup celery -A kharchang.celery worker --loglevel=info > celery_worker.out &
+nohup celery -A kharchang.celery beat --loglevel=info > celery_beat.out &

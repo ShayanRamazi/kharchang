@@ -163,6 +163,21 @@ class IFBCrawlTaskTest(TestCase):
         self.assertEqual(res, 1)
         self.assertEqual(IFBInstrument.objects.filter(fbid=25090).count(), 1)
 
+        
+
+    def test_arad_with_bad_settlement_date(self):
+        arad36_crawl_task = IFBCrawlTask(url="https://www.ifb.ir/Instrumentsmfi.aspx?id=24894")
+        res = arad36_crawl_task.run()
+        self.assertEqual(res, 0)
+        self.assertEqual(IFBInstrument.objects.filter(fbid=24894).count(), 0)
+
+
+    def test_arad_with_bad_payment_detail(self):
+        arad62_crawl_task = IFBCrawlTask(url="https://www.ifb.ir/Instrumentsmfi.aspx?id=25243")
+        res = arad62_crawl_task.run()
+        self.assertEqual(res, 0)
+        self.assertEqual(IFBInstrument.objects.filter(fbid=25243).count(), 0)
+
     def test_successful_akhza(self):
         akhza812_crawl_task = IFBCrawlTask(url="https://www.ifb.ir/Instrumentsmfi.aspx?id=24297")
         res = akhza812_crawl_task.run()

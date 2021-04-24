@@ -113,9 +113,12 @@ class IFBInstrument(BaseModel):
             dates_count = (self.settlementDate - self.publishDate).days + 1
             if len(self.paymentDetailsDates) == dates_count:
                 return True
+            else:
+                raise ValidationError(
+                    "payment details length should be equal to number of days from publication to settlement")
         elif len(self.paymentDetailsDates) == 0 and len(self.paymentDetailsValues) == 0:
             return True
-        raise ValidationError("payment details dates and values must have equal lengths, also payment details ")
+        raise ValidationError("payment details dates and values must have equal lengths")
 
     def validate_profit_distribution_start(self):
         if self.couponPeriod:
