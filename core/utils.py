@@ -1,6 +1,7 @@
 import re
 import datetime
 import jdatetime
+from django.db import transaction
 
 
 def parse_simple_jalali_date(date_string):
@@ -41,10 +42,12 @@ def get_first_number_from_string(string):
     return float(temp_list[0])
 
 
+@transaction.atomic
 def insert_list_to_database(entity_list):
     for entity in entity_list:
         entity.full_clean()
         entity.save()
+
 
 def string_to_time_with_out_separator(timeString):
     timeString = str(timeString)
@@ -78,7 +81,6 @@ def string_to_date(dateString):
     d = int(dateString[6:8])
     date = datetime.date(y, m, d)
     return date
-
 
 
 def get_georgian_date_as_string_without_separator(date):

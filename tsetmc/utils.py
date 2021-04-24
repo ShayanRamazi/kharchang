@@ -1,7 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.apps import apps
 import requests
-from tsetmc.models import BestLimitBuyData, BestLimitSellData
+import tsetmc.models as models
 import re
 import ast
 import core.utils as ut
@@ -36,7 +36,7 @@ def create_historical_buy_best_limits_list(best_limit_data, argument_dict):
         if not previous_record_of_row or previous_record_of_row['buy_amount'] != amount or previous_record_of_row[
             'buy_vol'] != volume or previous_record_of_row['buy_price'] != price:
             buy_best_limits.append(
-                BestLimitBuyData(time=time, row=row, amount=amount, volume=volume, price=price, **argument_dict))
+                models.BestLimitBuyData(time=time, row=row, amount=amount, volume=volume, price=price, **argument_dict))
     return buy_best_limits
 
 
@@ -53,7 +53,8 @@ def create_historical_sell_best_limits_list(best_limit_data, argument_dict):
         if not previous_record_of_row or previous_record_of_row['sell_amount'] != amount or previous_record_of_row[
             'sell_vol'] != volume or previous_record_of_row['sell_price'] != price:
             sell_best_limits.append(
-                BestLimitSellData(time=time, row=row, amount=amount, volume=volume, price=price, **argument_dict))
+                models.BestLimitSellData(time=time, row=row, amount=amount, volume=volume, price=price,
+                                         **argument_dict))
     return sell_best_limits
 
 
@@ -78,7 +79,7 @@ def parsHtmlToGetVars(url):
     instSimpleDataStartStr, InstSimpleDataEndStr = instSimpleDataStr.find("["), instSimpleDataStr.find("]")
     instSimpleData = ast.literal_eval(
         instSimpleDataStr[instSimpleDataStartStr + len('["InstSimpleData='):InstSimpleDataEndStr + 1])
-    bestLimitDataTemp = re.findall('BestLimitData=(.*);', html)
+    bestLimitDataTemp = re.findall('BestLimitData=(.*)]];', html.replace(" ", ""))
     bestLimitDataTempStr = bestLimitDataTemp[0]
     bestLimitDataTempStrStrs = bestLimitDataTempStr.replace('[', '').split('],')
     bestLimitData = [tmpStr.replace("'", "").split(",") for tmpStr in bestLimitDataTempStrStrs]
@@ -205,7 +206,7 @@ def jsonStaticTreshholdData(staticTreshholdData, instrumentPriceData, instSimple
         "minAllowed": staticTreshholdData[-1][-1],
         "baseVolume": instSimpleData[9],
         "numberOfShares": instSimpleData[8],
-        "yesterdayPrice": instrumentPriceData[3]
+        "yesterdayPrice": instrumentPriceData[0][3]
     }
     return jsonStaticTreshholdData
 
@@ -227,6 +228,7 @@ def getJson(url):
         "date": parsedDataDict["date"]
     }
     return jsonHistory
+
 
 def get_instrument_list_from_tsetmc():
     pass

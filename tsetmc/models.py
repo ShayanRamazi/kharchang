@@ -1,11 +1,10 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 from core.models import BaseModel, CrawlTask
-import logging
-
 from core.utils import insert_list_to_database
-from tsetmc.utils import create_entity_list, create_historical_buy_best_limits_list, \
-    create_historical_sell_best_limits_list, parsHtmlToGetVars, getJson
+import logging
+import datetime
+import tsetmc.utils as utils
 
 django_logger = logging.getLogger(__name__)
 
@@ -33,23 +32,23 @@ class ClientTypeData(BaseModel):
     date = models.DateField()
     time = models.TimeField()
     instrumentId = models.CharField(max_length=30)
-    numberBuyReal = models.IntegerField()
-    volumeBuyReal = models.IntegerField()
-    valueBuyReal = models.IntegerField()
+    numberBuyReal = models.BigIntegerField()
+    volumeBuyReal = models.BigIntegerField()
+    valueBuyReal = models.BigIntegerField()
     priceBuyReal = models.FloatField()
-    numberBuyLegal = models.IntegerField()
-    volumeBuyLegal = models.IntegerField()
-    valueBuyLegal = models.IntegerField()
+    numberBuyLegal = models.BigIntegerField()
+    volumeBuyLegal = models.BigIntegerField()
+    valueBuyLegal = models.BigIntegerField()
     priceBuyLegal = models.FloatField()
-    numberSellReal = models.IntegerField()
-    volumeSellReal = models.IntegerField()
-    valueSellReal = models.IntegerField()
+    numberSellReal = models.BigIntegerField()
+    volumeSellReal = models.BigIntegerField()
+    valueSellReal = models.BigIntegerField()
     priceSellReal = models.FloatField()
-    numberSellRegal = models.IntegerField()
-    volumeSellLegal = models.IntegerField()
-    valueSellLegal = models.IntegerField()
+    numberSellRegal = models.BigIntegerField()
+    volumeSellLegal = models.BigIntegerField()
+    valueSellLegal = models.BigIntegerField()
     priceSellLegal = models.FloatField()
-    changeLegalToReal = models.IntegerField()
+    changeLegalToReal = models.BigIntegerField()
 
 
 class InstrumentPriceData(BaseModel):
@@ -63,8 +62,8 @@ class InstrumentPriceData(BaseModel):
     maxPrice = models.IntegerField()
     minPrice = models.IntegerField()
     numberOfTransactions = models.IntegerField()
-    turnover = models.IntegerField()
-    valueOfTransactions = models.IntegerField()
+    turnover = models.BigIntegerField()
+    valueOfTransactions = models.BigIntegerField()
     status = models.BooleanField(default=True)
 
 
@@ -72,7 +71,7 @@ class BestLimitBuyData(BaseModel):
     date = models.DateField()
     instrumentId = models.CharField(max_length=30)
     time = models.TimeField()
-    row = models.IntegerField(validators=[MinValueValidator[0]])
+    row = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     amount = models.IntegerField()
     volume = models.IntegerField()
     price = models.IntegerField()
@@ -82,7 +81,7 @@ class BestLimitSellData(BaseModel):
     date = models.DateField()
     instrumentId = models.CharField(max_length=30)
     time = models.TimeField()
-    row = models.IntegerField(validators=[MinValueValidator[0]])
+    row = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     amount = models.IntegerField()
     volume = models.IntegerField()
     price = models.IntegerField()
@@ -104,7 +103,7 @@ class TseTmcCrawlTask(CrawlTask):
 
     @staticmethod
     def __parse_url__(url):
-        return getJson(url)
+        return utils.getJson(url), 1
 
     @staticmethod
     def __insert_data_to_database__(json_data):
@@ -112,17 +111,21 @@ class TseTmcCrawlTask(CrawlTask):
             'instrumentId': json_data["instrumentId"],
             'date': json_data["date"]
         }
+        client_type_time_dict = {
+            'time': datetime.time(15, 0, 0)
+        }
         start_true_dict = {"isStart": True}
         # django_logger.info("creating models for id " + json_data["instrumentId"] + " date " + json_data["date"])
-        yesterday_share_holders = create_entity_list(json_data["ShareHolderYesterdayData"],
-                                                     {**argument_dict, **start_true_dict}, ShareHolderData.__name__)
-        share_holders = create_entity_list(json_data["ShareHolderData"], argument_dict, ShareHolderData.__name__)
-        trades = create_entity_list(json_data["IntraTradeData"], argument_dict, IntraTradeData.__name__)
-        client_type = ClientTypeData(**json_data["ClientTypeData"])
-        staticTreshholdData = StaticTreshholdData(**json_data["StaticTreshholdData"])
-        price_data_list = create_entity_list(json_data["InstrumentPriceData"], InstrumentPriceData.__name__)
-        buy_best_limits = create_historical_buy_best_limits_list(json_data["BestLimits"], argument_dict)
-        sell_best_limits = create_historical_sell_best_limits_list(json_data["BestLimits"], argument_dict)
+        yesterday_share_holders = utils.create_entity_list(json_data["ShareHolderYesterdayData"],
+                                                           {**argument_dict, **start_true_dict},
+                                                           ShareHolderData.__name__)
+        share_holders = utils.create_entity_list(json_data["ShareHolderData"], argument_dict, ShareHolderData.__name__)
+        trades = utils.create_entity_list(json_data["IntraTradeData"], argument_dict, IntraTradeData.__name__)
+        client_type = ClientTypeData(**json_data["ClientTypeData"], **argument_dict, **client_type_time_dict)
+        staticTreshholdData = StaticTreshholdData(**json_data["StaticTreshholdData"], **argument_dict)
+        price_data_list = utils.create_entity_list(json_data["InstrumentPriceData"], argument_dict, InstrumentPriceData.__name__)
+        buy_best_limits = utils.create_historical_buy_best_limits_list(json_data["BestLimits"], argument_dict)
+        sell_best_limits = utils.create_historical_sell_best_limits_list(json_data["BestLimits"], argument_dict)
         insert_list_to_database(yesterday_share_holders)
         insert_list_to_database(share_holders)
         insert_list_to_database(trades)
