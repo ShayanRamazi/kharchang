@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.contenttypes.models import ContentType
 from django.apps import apps
 import requests
@@ -5,7 +7,9 @@ import tsetmc.models as models
 import re
 import ast
 import core.utils as ut
-
+import requests
+import urllib3
+from urllib3.exceptions import InsecureRequestWarning
 
 def create_entity_list(entity_dicts_list, arguments_dict, entity_model_name):
     z = ContentType.objects.get(model=entity_model_name.lower())
@@ -75,14 +79,17 @@ def parsHtmlToGetVars(url):
     intraTradeData = ast.literal_eval(re.findall('IntraTradeData=(.*);', html)[0])
     clientTypeData = ast.literal_eval(re.findall('ClientTypeData=(.*);', html)[0])
     closingPriceData = ast.literal_eval(re.findall('ClosingPriceData=(.*);', html)[0])
+    instrumentStateData = ast.literal_eval(re.findall('InstrumentStateData=(.*);', html)[0].replace(" ",""))
     instSimpleDataStr = str(re.findall('InstSimpleData=.*;', html))
     instSimpleDataStartStr, InstSimpleDataEndStr = instSimpleDataStr.find("["), instSimpleDataStr.find("]")
     instSimpleData = ast.literal_eval(
         instSimpleDataStr[instSimpleDataStartStr + len('["InstSimpleData='):InstSimpleDataEndStr + 1])
     bestLimitDataTemp = re.findall('BestLimitData=(.*)]];', html.replace(" ", ""))
-    bestLimitDataTempStr = bestLimitDataTemp[0]
-    bestLimitDataTempStrStrs = bestLimitDataTempStr.replace('[', '').split('],')
-    bestLimitData = [tmpStr.replace("'", "").split(",") for tmpStr in bestLimitDataTempStrStrs]
+    bestLimitData = []
+    if(len(bestLimitDataTemp)> 0):
+        bestLimitDataTempStr = bestLimitDataTemp[0]
+        bestLimitDataTempStrStrs = bestLimitDataTempStr.replace('[', '').split('],')
+        bestLimitData = [tmpStr.replace("'", "").split(",") for tmpStr in bestLimitDataTempStrStrs]
     staticTreshholdData = ast.literal_eval(re.findall('StaticTreshholdData=(.*);', html)[0])
     instrumentId, date = url.split("&i=")[1].split("&d=")
     date = ut.string_to_date(date)
@@ -96,10 +103,20 @@ def parsHtmlToGetVars(url):
         "InstrumentPriceData": closingPriceData,
         "InstSimpleData": instSimpleData,
         "BestLimitData": bestLimitData,
-        "StaticTreshholdData": staticTreshholdData
+        "StaticTreshholdData": staticTreshholdData,
+        "InstrumentStateData":instrumentStateData
     }
     return parsedDataDict
 
+def jsonInstrumentStateData(InstrumentStateData):
+    InstrumentStateDataJsonList = []
+    for i in range(len(InstrumentStateData)):
+        InstrumentStateDataJson = {
+            "time": time_for_status(InstrumentStateData[i][1]),
+            "status": InstrumentStateData[i][2],
+        }
+        InstrumentStateDataJsonList.append(InstrumentStateDataJson)
+    return InstrumentStateDataJsonList
 
 def jsonShareHolderDataYesterday(ShareHolderDataYesterday):
     shareHolderDataYesterdayJsonList = []
@@ -141,26 +158,31 @@ def jsonIntraTradeData(intraTradeData):
 
 
 def jsonClientTypeData(clientTypeData):
-    clientTypeDataJson = {
-        "numberBuyReal": clientTypeData[0],
-        "volumeBuyReal": clientTypeData[4],
-        "valueBuyReal": clientTypeData[12],
-        "priceBuyReal": clientTypeData[16],
-        "numberBuyLegal": clientTypeData[1],
-        "volumeBuyLegal": clientTypeData[6],
-        "valueBuyLegal": clientTypeData[13],
-        "priceBuyLegal": clientTypeData[17],
-        "numberSellReal": clientTypeData[2],
-        "volumeSellReal": clientTypeData[8],
-        "valueSellReal": clientTypeData[14],
-        "priceSellReal": clientTypeData[18],
-        "numberSellRegal": clientTypeData[3],
-        "volumeSellLegal": clientTypeData[10],
-        "valueSellLegal": clientTypeData[15],
-        "priceSellLegal": clientTypeData[19],
-        "changeLegalToReal": clientTypeData[20]
-    }
-    return clientTypeDataJson
+    clientTypeJsonList=[]
+    if(len(clientTypeData)>0):
+        clientTypeData = [clientTypeData]
+    for i in range(len(clientTypeData)):
+        clientTypeDataJson = {
+            "numberBuyReal": clientTypeData[i][0],
+            "volumeBuyReal": clientTypeData[i][4],
+            "valueBuyReal": clientTypeData[i][12],
+            "priceBuyReal": clientTypeData[i][16],
+            "numberBuyLegal": clientTypeData[i][1],
+            "volumeBuyLegal": clientTypeData[i][6],
+            "valueBuyLegal": clientTypeData[i][13],
+            "priceBuyLegal": clientTypeData[i][17],
+            "numberSellReal": clientTypeData[i][2],
+            "volumeSellReal": clientTypeData[i][8],
+            "valueSellReal": clientTypeData[i][14],
+            "priceSellReal": clientTypeData[i][18],
+            "numberSellRegal": clientTypeData[i][3],
+            "volumeSellLegal": clientTypeData[i][10],
+            "valueSellLegal": clientTypeData[i][15],
+            "priceSellLegal": clientTypeData[i][19],
+            "changeLegalToReal": clientTypeData[i][20]
+        }
+        clientTypeJsonList.append(clientTypeDataJson)
+    return clientTypeJsonList
 
 
 def jsonClosingPriceData(closingPriceData):
@@ -214,7 +236,7 @@ def jsonStaticTreshholdData(staticTreshholdData, instrumentPriceData, instSimple
 def getJson(url):
     parsedDataDict = parsHtmlToGetVars(url)
     jsonHistory = {
-
+        "InstrumentStateData":jsonInstrumentStateData(parsedDataDict["InstrumentStateData"]),
         "ShareHolderYesterdayData": jsonShareHolderDataYesterday(parsedDataDict["ShareHolderDataYesterday"]),
         "ShareHolderData": jsonShareHolderData(parsedDataDict["ShareHolderData"]),
         "IntraTradeData": jsonIntraTradeData(parsedDataDict["IntraTradeData"]),
@@ -229,10 +251,20 @@ def getJson(url):
     }
     return jsonHistory
 
+def time_for_status(time):
+    if(time==1):
+        return datetime.time(6,0,0)
+    else:
+        return ut.string_to_time_with_out_separator(time)
+
 
 def get_instrument_list_from_tsetmc():
     pass
 
 
 def get_instrument_dates_to_crawl(instrumentId):
-    pass
+    urllib3.disable_warnings(InsecureRequestWarning)
+    res = requests.get('https://members.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i='+str(instrumentId)+'&Top=999999&A=',
+                       verify=False)
+    date_list=[ut.string_to_date(res.text.split(";")[i][0:8]) for i in range(len(res.text.split(";"))-1)]
+    return date_list

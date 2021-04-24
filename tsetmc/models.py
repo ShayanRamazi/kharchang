@@ -97,6 +97,28 @@ class StaticTreshholdData(BaseModel):
     yesterdayPrice = models.IntegerField()
 
 
+
+class InstrumentStateData(BaseModel):
+    STATUS_ID = [
+        ('I', 'ممنوع'),
+        ('A', 'مجاز'),
+        ('AG', 'مجاز-مسدود'),
+        ('AS', 'مجاز-متوقف'),
+        ('AR', 'مجاز-محفوظ'),
+        ('IG', 'ممنوع-مسدود'),
+        ('IS', 'ممنوع-متوقف'),
+        ('IR', 'ممنوع-محفوظ'),
+    ]
+    date = models.DateField()
+    instrumentId = models.CharField(max_length=30)
+    time = models.TimeField()
+    status = models.CharField(
+        max_length=2,
+        choices=STATUS_ID
+    )
+
+
+
 class TseTmcCrawlTask(CrawlTask):
     date_to_crawl = models.DateField()
     instrumentId = models.CharField(max_length=30)
@@ -119,19 +141,24 @@ class TseTmcCrawlTask(CrawlTask):
         yesterday_share_holders = utils.create_entity_list(json_data["ShareHolderYesterdayData"],
                                                            {**argument_dict, **start_true_dict},
                                                            ShareHolderData.__name__)
+        instrument_state_data = utils.create_entity_list(json_data["InstrumentStateData"], argument_dict, InstrumentStateData.__name__)
         share_holders = utils.create_entity_list(json_data["ShareHolderData"], argument_dict, ShareHolderData.__name__)
         trades = utils.create_entity_list(json_data["IntraTradeData"], argument_dict, IntraTradeData.__name__)
-        client_type = ClientTypeData(**json_data["ClientTypeData"], **argument_dict, **client_type_time_dict)
+        #client_type = ClientTypeData(**json_data["ClientTypeData"], **argument_dict, **client_type_time_dict)
         staticTreshholdData = StaticTreshholdData(**json_data["StaticTreshholdData"], **argument_dict)
-        price_data_list = utils.create_entity_list(json_data["InstrumentPriceData"], argument_dict, InstrumentPriceData.__name__)
+        price_data_list = utils.create_entity_list(json_data["InstrumentPriceData"], argument_dict,
+                                                   InstrumentPriceData.__name__)
+        client_type_list = utils.create_entity_list(json_data["ClientTypeData"],{**argument_dict, **client_type_time_dict},
+                                                   ClientTypeData.__name__)
         buy_best_limits = utils.create_historical_buy_best_limits_list(json_data["BestLimits"], argument_dict)
         sell_best_limits = utils.create_historical_sell_best_limits_list(json_data["BestLimits"], argument_dict)
         insert_list_to_database(yesterday_share_holders)
         insert_list_to_database(share_holders)
         insert_list_to_database(trades)
-        client_type.save()
+        insert_list_to_database(client_type_list)
         staticTreshholdData.save()
         insert_list_to_database(price_data_list)
         insert_list_to_database(buy_best_limits)
         insert_list_to_database(sell_best_limits)
+        insert_list_to_database(instrument_state_data)
         return 1

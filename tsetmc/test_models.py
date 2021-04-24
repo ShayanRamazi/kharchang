@@ -1,9 +1,10 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
+import datetime
 
 from core.utils import string_to_date
-from tsetmc.models import TseTmcCrawlTask, IntraTradeData
+from tsetmc.models import TseTmcCrawlTask, IntraTradeData, ClientTypeData, StaticTreshholdData
 
 
 # class TradeTest(TestCase):
@@ -47,12 +48,17 @@ class TseTmcCrawlTaskTest(TestCase):
             date=string_to_date("20210421")) \
             .count()
         self.assertEqual(intra_trade_count, inserted_intra_trade_count)
+        self.assertEqual(ClientTypeData.objects.filter(
+            date=datetime.date(2021,4,21),
+            time=datetime.time(15,0,0),
+            instrumentId="35425587644337450"
+        ).count(), 1)
 
     def test_successful_instrument_with_zero_volume(self):
         vatejarat_crawl_task = TseTmcCrawlTask(
             url="http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=63917421733088077&d=20090505",
-            instrumentId="35425587644337450",
-            date_to_crawl=string_to_date("20210421")
+            instrumentId="63917421733088077",
+            date_to_crawl=string_to_date("20090505")
         )
         res = vatejarat_crawl_task.run()
         self.assertEqual(res, 1)
@@ -63,7 +69,7 @@ class TseTmcCrawlTaskTest(TestCase):
             date=string_to_date("20090505")) \
             .count()
         self.assertEqual(intra_trade_count, inserted_intra_trade_count)
-
+        self.assertEqual(StaticTreshholdData.objects.filter(instrumentId="63917421733088077",date=string_to_date("20090505")).count(),1)
     # def test_arad_with_bad_settlement_date(self):
     #     arad36_crawl_task = IFBCrawlTask(url="https://www.ifb.ir/Instrumentsmfi.aspx?id=24894")
     #     res = arad36_crawl_task.run()

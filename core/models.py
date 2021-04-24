@@ -67,6 +67,7 @@ class BaseTask(BaseModel):
         try:
             flag = self.__run__()
         except Exception as e:
+            print(e)
             self.error_message = str(e)
             flag = 0
         # if flag != 0 and flag != 1:
