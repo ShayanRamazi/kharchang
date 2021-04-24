@@ -5,7 +5,7 @@ import logging
 
 from core.utils import insert_list_to_database
 from tsetmc.utils import create_entity_list, create_historical_buy_best_limits_list, \
-    create_historical_sell_best_limits_list
+    create_historical_sell_best_limits_list, parsHtmlToGetVars, getJson
 
 django_logger = logging.getLogger(__name__)
 
@@ -104,7 +104,7 @@ class TseTmcCrawlTask(CrawlTask):
 
     @staticmethod
     def __parse_url__(url):
-        pass
+        return getJson(url)
 
     @staticmethod
     def __insert_data_to_database__(json_data):

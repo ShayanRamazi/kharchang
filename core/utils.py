@@ -1,5 +1,5 @@
 import re
-
+import datetime
 import jdatetime
 
 
@@ -45,6 +45,40 @@ def insert_list_to_database(entity_list):
     for entity in entity_list:
         entity.full_clean()
         entity.save()
+
+def string_to_time_with_out_separator(timeString):
+    timeString = str(timeString)
+    if (len(timeString) < 6):
+        timeString = "0" + timeString
+    hh = int(timeString[0:2])
+    mm = int(timeString[2:4])
+    ss = int(timeString[4:6])
+    return datetime.time(hh, mm, ss)
+
+
+def string_to_time_with_separator(timeString):
+    time = [int(string) for string in timeString.split(":")]
+    time = datetime.time(time[0], time[1], time[2])
+    return time
+
+
+def string_to_time_and_date(timeAndDateString):
+    timeAndDateString = str(timeAndDateString)
+    date, time = timeAndDateString.split(" ")
+    date = parse_simple_jalali_date(date)
+    time = [int(string) for string in time.split(":")]
+    time = datetime.time(time[0], time[1], time[2])
+    return date, time
+
+
+def string_to_date(dateString):
+    dateString = str(dateString)
+    y = int(dateString[0:4])
+    m = int(dateString[4:6])
+    d = int(dateString[6:8])
+    date = datetime.date(y, m, d)
+    return date
+
 
 
 def get_georgian_date_as_string_without_separator(date):

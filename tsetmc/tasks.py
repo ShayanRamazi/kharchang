@@ -24,6 +24,7 @@ def ifb_daily_crawl():
         dates_list = get_instrument_dates_to_crawl(instrument['instrumentId'])
         if len(dates_list) == 0:
             logger.info("empty dates list to crawl for id:", instrument['instrumentId'])
+            continue
         # get all tsetmc_crawl_tasks for this instrument with state D and Q ordered by date descending
         all_d_q_tse_tasks_for_instrument = TseTmcCrawlTask.objects.filter(
             id=instrument['instrumentId'],

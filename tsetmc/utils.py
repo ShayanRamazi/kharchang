@@ -4,7 +4,7 @@ import requests
 from tsetmc.models import BestLimitBuyData, BestLimitSellData
 import re
 import ast
-import datetime
+import core.utils as ut
 
 
 def create_entity_list(entity_dicts_list, arguments_dict, entity_model_name):
@@ -83,7 +83,11 @@ def parsHtmlToGetVars(url):
     bestLimitDataTempStrStrs = bestLimitDataTempStr.replace('[', '').split('],')
     bestLimitData = [tmpStr.replace("'", "").split(",") for tmpStr in bestLimitDataTempStrStrs]
     staticTreshholdData = ast.literal_eval(re.findall('StaticTreshholdData=(.*);', html)[0])
+    instrumentId, date = url.split("&i=")[1].split("&d=")
+    date = ut.string_to_date(date)
     parsedDataDict = {
+        "instrumentId": instrumentId,
+        "date": date,
         "ShareHolderDataYesterday": shareHolderDataYesterday,
         "ShareHolderData": shareHolderData,
         "IntraTradeData": intraTradeData,
@@ -126,7 +130,7 @@ def jsonIntraTradeData(intraTradeData):
     intraTradeDataJsonList = []
     for i in range(len(intraTradeData)):
         intraTradeDataJson = {
-            "time": intraTradeData[i][1],
+            "time": ut.string_to_time_with_separator(intraTradeData[i][1]),
             "amount": intraTradeData[i][2],
             "price": intraTradeData[i][3],
             "canceled": intraTradeData[i][4]
@@ -162,7 +166,7 @@ def jsonClosingPriceData(closingPriceData):
     closingPriceDataJsonList = []
     for i in range(len(closingPriceData)):
         closingPriceDataJson = {
-            "time": closingPriceData[i][0],
+            "time": ut.string_to_time_and_date(closingPriceData[i][0])[1],
             "lastTradePrice": closingPriceData[i][2],
             "lastPrice": closingPriceData[i][3],
             "firstPrice": closingPriceData[i][4],
@@ -182,7 +186,7 @@ def jsonBestLimitData(bestLimitData):
     bestLimitDataJsonList = []
     for i in range(len(bestLimitData)):
         bestLimitDataJson = {
-            "time": bestLimitData[i][0],
+            "time": ut.string_to_time_with_out_separator(bestLimitData[i][0]),
             "row": bestLimitData[i][1],
             "buy_amount": bestLimitData[i][2],
             "buy_vol": bestLimitData[i][3],
@@ -209,6 +213,7 @@ def jsonStaticTreshholdData(staticTreshholdData, instrumentPriceData, instSimple
 def getJson(url):
     parsedDataDict = parsHtmlToGetVars(url)
     jsonHistory = {
+
         "ShareHolderYesterdayData": jsonShareHolderDataYesterday(parsedDataDict["ShareHolderDataYesterday"]),
         "ShareHolderData": jsonShareHolderData(parsedDataDict["ShareHolderData"]),
         "IntraTradeData": jsonIntraTradeData(parsedDataDict["IntraTradeData"]),
@@ -217,19 +222,11 @@ def getJson(url):
         "BestLimits": jsonBestLimitData(parsedDataDict["BestLimitData"]),
         "StaticTreshholdData": jsonStaticTreshholdData(parsedDataDict["StaticTreshholdData"],
                                                        parsedDataDict["InstrumentPriceData"],
-                                                       parsedDataDict["InstSimpleData"])
+                                                       parsedDataDict["InstSimpleData"]),
+        "instrumentId": parsedDataDict["instrumentId"],
+        "date": parsedDataDict["date"]
     }
     return jsonHistory
-
-
-def stringToTime(timeString):
-    if (len(timeString) < 6):
-        timeString = "0" + timeString
-    hh = int(timeString[0:2])
-    mm = int(timeString[2:4])
-    ss = int(timeString[4:6])
-    return datetime.time(hh, mm, ss)
-
 
 def get_instrument_list_from_tsetmc():
     pass

@@ -2,10 +2,11 @@ import datetime
 from unittest import TestCase
 
 from core.utils import parse_simple_jalali_date, add_month_to_jalali_string, georgian_to_simple_jalali_string, \
-    get_first_number_from_string, get_georgian_date_as_string_without_separator
+    get_first_number_from_string, get_georgian_date_as_string_without_separator, string_to_time_with_out_separator, \
+    string_to_time_with_separator, string_to_time_and_date, string_to_date
 
 
-class JalaliDateUtilsTest(TestCase):
+class DateUtilsTest(TestCase):
 
     def test_parse_simple_jalali_date(self):
         someday_jalali_date_string = "1400/01/25"
@@ -20,7 +21,6 @@ class JalaliDateUtilsTest(TestCase):
 
         bad_jalali_date_string = "1400/13/13"
         self.assertRaises(ValueError, parse_simple_jalali_date, bad_jalali_date_string)
-
 
     def test_get_georgian_date_as_string_without_separator(self):
         someday = datetime.date(2021, 4, 14)
@@ -54,6 +54,40 @@ class JalaliDateUtilsTest(TestCase):
         someday = datetime.datetime(2021, 4, 14)
         date_string = georgian_to_simple_jalali_string(someday)
         self.assertEqual(date_string, someday_jalali_date_string)
+
+    def test_string_to_time_with_out_separator(self):
+        some_time_string = '62340'
+        some_time = datetime.time(6, 23, 40)
+        time = string_to_time_with_out_separator(some_time_string)
+        self.assertEqual(time, some_time)
+        some_time_string = '124034'
+        some_time = datetime.time(12, 40, 34)
+        time = string_to_time_with_out_separator(some_time_string)
+        self.assertEqual(time, some_time)
+
+    def test_string_to_time_with_separator(self):
+        some_time_string = '6:23:40'
+        some_time = datetime.time(6, 23, 40)
+        time = string_to_time_with_separator(some_time_string)
+        self.assertEqual(time, some_time)
+        some_time_string = '12:40:34'
+        some_time = datetime.time(12, 40, 34)
+        time = string_to_time_with_separator(some_time_string)
+        self.assertEqual(time, some_time)
+
+    def test_string_to_time_and_date(self):
+        some_time_date_string = "1400/2/1 06:36:54"
+        some_time = datetime.time(6, 36, 54)
+        some_date = parse_simple_jalali_date("1400/2/1")
+        date, time = string_to_time_and_date(some_time_date_string)
+        self.assertEqual(date, some_date)
+        self.assertEqual(time, some_time)
+
+    def test_string_to_date(self):
+        some_date_string = "20210211"
+        some_date = datetime.date(2021, 2, 11)
+        date = string_to_date(some_date_string)
+        self.assertEqual(date, some_date)
 
 
 class StringManipulationTest(TestCase):
