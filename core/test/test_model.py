@@ -173,7 +173,7 @@ class CrawlTaskTest(TestCase):
         self.assertEqual(task.error_message, task.ERROR_MESSAGE_INSERTION_ERROR)
         task.run()
         self.assertEqual(task.state, task.STATE_ERROR)
-        self.assertEqual(task.error, task.ERROR_MESSAGE_INSERTION_ERROR)
+        self.assertEqual(task.error_message, task.ERROR_MESSAGE_INSERTION_ERROR)
         res = task.run()
         self.assertEqual(res, -1)
 

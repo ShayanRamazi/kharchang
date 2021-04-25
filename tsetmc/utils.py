@@ -11,6 +11,7 @@ import requests
 import urllib3
 from urllib3.exceptions import InsecureRequestWarning
 
+
 def create_entity_list(entity_dicts_list, arguments_dict, entity_model_name):
     z = ContentType.objects.get(model=entity_model_name.lower())
     EntityModel = apps.get_model(z.app_label, entity_model_name)
@@ -79,14 +80,14 @@ def parsHtmlToGetVars(url):
     intraTradeData = ast.literal_eval(re.findall('IntraTradeData=(.*);', html)[0])
     clientTypeData = ast.literal_eval(re.findall('ClientTypeData=(.*);', html)[0])
     closingPriceData = ast.literal_eval(re.findall('ClosingPriceData=(.*);', html)[0])
-    instrumentStateData = ast.literal_eval(re.findall('InstrumentStateData=(.*);', html)[0].replace(" ",""))
+    instrumentStateData = ast.literal_eval(re.findall('InstrumentStateData=(.*);', html)[0].replace(" ", ""))
     instSimpleDataStr = str(re.findall('InstSimpleData=.*;', html))
     instSimpleDataStartStr, InstSimpleDataEndStr = instSimpleDataStr.find("["), instSimpleDataStr.find("]")
     instSimpleData = ast.literal_eval(
         instSimpleDataStr[instSimpleDataStartStr + len('["InstSimpleData='):InstSimpleDataEndStr + 1])
     bestLimitDataTemp = re.findall('BestLimitData=(.*)]];', html.replace(" ", ""))
     bestLimitData = []
-    if(len(bestLimitDataTemp)> 0):
+    if (len(bestLimitDataTemp) > 0):
         bestLimitDataTempStr = bestLimitDataTemp[0]
         bestLimitDataTempStrStrs = bestLimitDataTempStr.replace('[', '').split('],')
         bestLimitData = [tmpStr.replace("'", "").split(",") for tmpStr in bestLimitDataTempStrStrs]
@@ -104,9 +105,10 @@ def parsHtmlToGetVars(url):
         "InstSimpleData": instSimpleData,
         "BestLimitData": bestLimitData,
         "StaticTreshholdData": staticTreshholdData,
-        "InstrumentStateData":instrumentStateData
+        "InstrumentStateData": instrumentStateData
     }
     return parsedDataDict
+
 
 def jsonInstrumentStateData(InstrumentStateData):
     InstrumentStateDataJsonList = []
@@ -117,6 +119,7 @@ def jsonInstrumentStateData(InstrumentStateData):
         }
         InstrumentStateDataJsonList.append(InstrumentStateDataJson)
     return InstrumentStateDataJsonList
+
 
 def jsonShareHolderDataYesterday(ShareHolderDataYesterday):
     shareHolderDataYesterdayJsonList = []
@@ -158,8 +161,8 @@ def jsonIntraTradeData(intraTradeData):
 
 
 def jsonClientTypeData(clientTypeData):
-    clientTypeJsonList=[]
-    if(len(clientTypeData)>0):
+    clientTypeJsonList = []
+    if (len(clientTypeData) > 0):
         clientTypeData = [clientTypeData]
     for i in range(len(clientTypeData)):
         clientTypeDataJson = {
@@ -236,7 +239,7 @@ def jsonStaticTreshholdData(staticTreshholdData, instrumentPriceData, instSimple
 def getJson(url):
     parsedDataDict = parsHtmlToGetVars(url)
     jsonHistory = {
-        "InstrumentStateData":jsonInstrumentStateData(parsedDataDict["InstrumentStateData"]),
+        "InstrumentStateData": jsonInstrumentStateData(parsedDataDict["InstrumentStateData"]),
         "ShareHolderYesterdayData": jsonShareHolderDataYesterday(parsedDataDict["ShareHolderDataYesterday"]),
         "ShareHolderData": jsonShareHolderData(parsedDataDict["ShareHolderData"]),
         "IntraTradeData": jsonIntraTradeData(parsedDataDict["IntraTradeData"]),
@@ -251,20 +254,26 @@ def getJson(url):
     }
     return jsonHistory
 
+
 def time_for_status(time):
-    if(time==1):
-        return datetime.time(6,0,0)
+    if (time == 1):
+        return datetime.time(6, 0, 0)
     else:
         return ut.string_to_time_with_out_separator(time)
 
 
-def get_instrument_list_from_tsetmc():
-    pass
+def get_instrument_id_list_from_tsetmc():
+    resp = requests.get("http://www.tsetmc.com/tsev2/data/MarketWatchPlus.aspx?h=0&r=0")
+    parts = resp.text.split("@")
+    instrumentIds = [x.split(",")[0] for x in parts[2].split(";")]
+    return instrumentIds
 
 
 def get_instrument_dates_to_crawl(instrumentId):
     urllib3.disable_warnings(InsecureRequestWarning)
-    res = requests.get('https://members.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i='+str(instrumentId)+'&Top=999999&A=',
-                       verify=False)
-    date_list=[ut.string_to_date(res.text.split(";")[i][0:8]) for i in range(len(res.text.split(";"))-1)]
+    #  A=0 gets dates where the instrument trade volume is greater than zero and A=1 returns all dates
+    res = requests.get(
+        'https://members.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i=' + str(instrumentId) + '&Top=999999&A=0',
+        verify=False)
+    date_list = [ut.string_to_date(res.text.split(";")[i][0:8]) for i in range(len(res.text.split(";")) - 1)]
     return date_list

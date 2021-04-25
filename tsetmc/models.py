@@ -97,7 +97,6 @@ class StaticTreshholdData(BaseModel):
     yesterdayPrice = models.IntegerField()
 
 
-
 class InstrumentStateData(BaseModel):
     STATUS_ID = [
         ('I', 'ممنوع'),
@@ -118,9 +117,8 @@ class InstrumentStateData(BaseModel):
     )
 
 
-
 class TseTmcCrawlTask(CrawlTask):
-    date_to_crawl = models.DateField()
+    dateToCrawl = models.DateField()
     instrumentId = models.CharField(max_length=30)
 
     @staticmethod
@@ -141,15 +139,17 @@ class TseTmcCrawlTask(CrawlTask):
         yesterday_share_holders = utils.create_entity_list(json_data["ShareHolderYesterdayData"],
                                                            {**argument_dict, **start_true_dict},
                                                            ShareHolderData.__name__)
-        instrument_state_data = utils.create_entity_list(json_data["InstrumentStateData"], argument_dict, InstrumentStateData.__name__)
+        instrument_state_data = utils.create_entity_list(json_data["InstrumentStateData"], argument_dict,
+                                                         InstrumentStateData.__name__)
         share_holders = utils.create_entity_list(json_data["ShareHolderData"], argument_dict, ShareHolderData.__name__)
         trades = utils.create_entity_list(json_data["IntraTradeData"], argument_dict, IntraTradeData.__name__)
-        #client_type = ClientTypeData(**json_data["ClientTypeData"], **argument_dict, **client_type_time_dict)
+        # client_type = ClientTypeData(**json_data["ClientTypeData"], **argument_dict, **client_type_time_dict)
         staticTreshholdData = StaticTreshholdData(**json_data["StaticTreshholdData"], **argument_dict)
         price_data_list = utils.create_entity_list(json_data["InstrumentPriceData"], argument_dict,
                                                    InstrumentPriceData.__name__)
-        client_type_list = utils.create_entity_list(json_data["ClientTypeData"],{**argument_dict, **client_type_time_dict},
-                                                   ClientTypeData.__name__)
+        client_type_list = utils.create_entity_list(json_data["ClientTypeData"],
+                                                    {**argument_dict, **client_type_time_dict},
+                                                    ClientTypeData.__name__)
         buy_best_limits = utils.create_historical_buy_best_limits_list(json_data["BestLimits"], argument_dict)
         sell_best_limits = utils.create_historical_sell_best_limits_list(json_data["BestLimits"], argument_dict)
         insert_list_to_database(yesterday_share_holders)
@@ -162,3 +162,28 @@ class TseTmcCrawlTask(CrawlTask):
         insert_list_to_database(sell_best_limits)
         insert_list_to_database(instrument_state_data)
         return 1
+
+
+
+class TseTmcInstrument(BaseModel):
+    FLOWS = [
+        (0, "عمومی، مشترک بین بورس و فرابورس"),
+        (1, "بورس",),
+        (2, "فرابورس"),
+        (3, "آتی"),
+        (4, "پایه فرابورس"),
+        (5, "پایه فرابورس(منتشر نمی شود)"),
+        (6, "بورس انرژی"),
+        (7, "بورس کالا")
+    ]
+    instrumentId = models.CharField(max_length=30)
+    isin = models.CharField(max_length=20)
+    symbolFa = models.CharField(max_length=20)
+    industry = models.CharField(max_length=50)
+    flow = models.SmallIntegerField(choices=FLOWS)
+    baseVolume = models.BigIntegerField()
+    eps = models.IntegerField()
+    pe = models.FloatField()
+    pe_group = models.FloatField()
+    totalShares = models.BigIntegerField()
+    cisin = models.CharField(max_length=20)

@@ -35,10 +35,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'tsetmc.apps.TsetmcConfig',
     'core.apps.CoreConfig',
     'rest_framework',
-    'ifb.apps.IfbConfig'
+    'ifb.apps.IfbConfig',
+    'tsetmc.apps.TsetmcConfig'
 ]
 
 MIDDLEWARE = [
@@ -97,9 +97,9 @@ DATABASES = {
 
         'NAME': 'tse',
 
-        'USER': 'postgres',
+        'USER': 'hamed',
 
-        'PASSWORD': 'shayan',
+        'PASSWORD': '',
 
         'HOST': '127.0.0.1',
 
@@ -110,7 +110,6 @@ DATABASES = {
     }
 
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
