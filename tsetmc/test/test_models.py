@@ -50,7 +50,7 @@ class TseTmcCrawlTaskTest(TestCase):
         self.assertEqual(intra_trade_count, inserted_intra_trade_count)
         self.assertEqual(ClientTypeData.objects.filter(
             date=datetime.date(2021, 4, 21),
-            time=datetime.time(15, 0, 0),
+            # time=datetime.time(15, 0, 0),
             instrumentId="35425587644337450"
         ).count(), 1)
 

@@ -1,19 +1,29 @@
+import datetime
+import requests
+import redis
+import dateutil.parser
 from celery.schedules import crontab
 
 from core.utils import get_georgian_date_as_string_without_separator
+from kharchang import settings
 from kharchang.celery import app as celery
 from core.tasks import run_single_time_task
 from celery.utils.log import get_task_logger
 
-from tsetmc.models import TseTmcCrawlTask
+from tsetmc.models import TseTmcCrawlTask, MiddleDayClientTypeData
 from tsetmc.utils import get_instrument_id_list_from_tsetmc, get_instrument_dates_to_crawl
 
 logger = get_task_logger(__name__)
 base_url = 'http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=%s&d=%s'
+client_type_url = "http://www.tsetmc.com/tsev2/data/ClientTypeAll.aspx"
+
+redis_instance = redis.StrictRedis(host=settings.REDIS_HOST,
+                                   port=settings.REDIS_PORT, db=0)
+CLIENT_TYPE_REDIS_PREFIX = "ctd__"
 
 
 @celery.task(name="tsetmc_daily_crawl_task")
-def ifb_daily_crawl():
+def tsetmc_daily_crawl():
     logger.info("Get Instruments list")
     # get tse instruments list
     tse_instrument_id_list = get_instrument_id_list_from_tsetmc()
@@ -64,9 +74,53 @@ def add_tsetmc_task(instrument_id, date):
     run_single_time_task.delay(new_task.id, new_task.get_class_name())
 
 
+@celery.task(name="tsetmc_client_type_task")
+def tsetmc_client_type_crawl():
+    now = datetime.datetime.now()
+    #  TODO: check this condition
+    if now.hour > 14 or now.hour < 8:
+        return
+    resp = requests.get(client_type_url)
+    now_iso_format = now.isoformat()
+    for client_type_string in resp.text.split(";"):
+        parts = client_type_string.split(",")
+        if len(parts) != 9:
+            continue
+        temp_value = redis_instance.get(CLIENT_TYPE_REDIS_PREFIX + parts[0])
+        if temp_value == client_type_string:
+            continue
+        redis_instance.set(CLIENT_TYPE_REDIS_PREFIX + parts[0], client_type_string)
+        add_single_client_type_data.delay(client_type_string, now_iso_format)
+
+
+@celery.task(name="tsetmc_add_single_client_type_task")
+def add_single_client_type_data(client_type_string, time_iso_format):
+    parts = client_type_string.split(",")
+    datetime = dateutil.parser.parse(time_iso_format)
+    client_type_data = MiddleDayClientTypeData()
+    client_type_data.date = datetime.date()
+    client_type_data.time = datetime.time()
+    client_type_data.instrumentId = parts[0]
+    client_type_data.numberBuyReal = parts[1]
+    client_type_data.numberBuyLegal = parts[2]
+    client_type_data.volumeBuyReal = parts[3]
+    client_type_data.volumeBuyLegal = parts[4]
+    client_type_data.numberSellReal = parts[5]
+    client_type_data.numberSellLegal = parts[6]
+    client_type_data.volumeSellReal = parts[7]
+    client_type_data.volumeSellLegal = parts[8]
+    client_type_data.save()
+
+
+
+
 celery.conf.beat_schedule = {
     'TSE daily crawl akhzas and arads': {
         'task': 'tsetmc_daily_crawl_task',
-        'schedule': crontab(hour='13', minute='00')
+        'schedule': crontab(hour='20', minute='00')
+    },
+    'TSE client type data': {
+        'task': 'tsetmc_client_type_task',
+        'schedule': 5.0,
     }
 }

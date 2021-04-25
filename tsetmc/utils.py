@@ -178,7 +178,7 @@ def jsonClientTypeData(clientTypeData):
             "volumeSellReal": clientTypeData[i][8],
             "valueSellReal": clientTypeData[i][14],
             "priceSellReal": clientTypeData[i][18],
-            "numberSellRegal": clientTypeData[i][3],
+            "numberSellLegal": clientTypeData[i][3],
             "volumeSellLegal": clientTypeData[i][10],
             "valueSellLegal": clientTypeData[i][15],
             "priceSellLegal": clientTypeData[i][19],

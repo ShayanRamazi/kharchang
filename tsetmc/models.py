@@ -30,7 +30,7 @@ class IntraTradeData(BaseModel):
 
 class ClientTypeData(BaseModel):
     date = models.DateField()
-    time = models.TimeField()
+    # time = models.TimeField()
     instrumentId = models.CharField(max_length=30)
     numberBuyReal = models.BigIntegerField()
     volumeBuyReal = models.BigIntegerField()
@@ -44,11 +44,25 @@ class ClientTypeData(BaseModel):
     volumeSellReal = models.BigIntegerField()
     valueSellReal = models.BigIntegerField()
     priceSellReal = models.FloatField()
-    numberSellRegal = models.BigIntegerField()
+    numberSellLegal = models.BigIntegerField()
     volumeSellLegal = models.BigIntegerField()
     valueSellLegal = models.BigIntegerField()
     priceSellLegal = models.FloatField()
     changeLegalToReal = models.BigIntegerField()
+
+
+class MiddleDayClientTypeData(BaseModel):
+    date = models.DateField()
+    time = models.TimeField()
+    instrumentId = models.CharField(max_length=30)
+    numberBuyReal = models.BigIntegerField()
+    volumeBuyReal = models.BigIntegerField()
+    numberBuyLegal = models.BigIntegerField()
+    volumeBuyLegal = models.BigIntegerField()
+    numberSellReal = models.BigIntegerField()
+    volumeSellReal = models.BigIntegerField()
+    numberSellLegal = models.BigIntegerField()
+    volumeSellLegal = models.BigIntegerField()
 
 
 class InstrumentPriceData(BaseModel):
@@ -131,9 +145,9 @@ class TseTmcCrawlTask(CrawlTask):
             'instrumentId': json_data["instrumentId"],
             'date': json_data["date"]
         }
-        client_type_time_dict = {
-            'time': datetime.time(15, 0, 0)
-        }
+        # client_type_time_dict = {
+        #     'time': datetime.time(15, 0, 0)
+        # }
         start_true_dict = {"isStart": True}
         # django_logger.info("creating models for id " + json_data["instrumentId"] + " date " + json_data["date"])
         yesterday_share_holders = utils.create_entity_list(json_data["ShareHolderYesterdayData"],
@@ -148,7 +162,7 @@ class TseTmcCrawlTask(CrawlTask):
         price_data_list = utils.create_entity_list(json_data["InstrumentPriceData"], argument_dict,
                                                    InstrumentPriceData.__name__)
         client_type_list = utils.create_entity_list(json_data["ClientTypeData"],
-                                                    {**argument_dict, **client_type_time_dict},
+                                                    argument_dict,
                                                     ClientTypeData.__name__)
         buy_best_limits = utils.create_historical_buy_best_limits_list(json_data["BestLimits"], argument_dict)
         sell_best_limits = utils.create_historical_sell_best_limits_list(json_data["BestLimits"], argument_dict)
