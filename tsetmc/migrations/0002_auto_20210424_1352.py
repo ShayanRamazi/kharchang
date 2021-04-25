@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
                 ('volumeSellReal', models.IntegerField()),
                 ('valueSellReal', models.IntegerField()),
                 ('priceSellReal', models.FloatField()),
-                ('numberSellLegal', models.IntegerField()),
+                ('numberSellRegal', models.IntegerField()),
                 ('volumeSellLegal', models.IntegerField()),
                 ('valueSellLegal', models.IntegerField()),
                 ('priceSellLegal', models.FloatField()),

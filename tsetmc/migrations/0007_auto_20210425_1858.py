@@ -36,4 +36,9 @@ class Migration(migrations.Migration):
             model_name='clienttypedata',
             name='time',
         ),
+        migrations.RenameField(
+            model_name='clienttypedata',
+            old_name='numberSellRegal',
+            new_name='numberSellLegal',
+        ),
     ]
