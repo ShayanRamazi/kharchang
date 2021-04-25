@@ -112,15 +112,13 @@ def add_single_client_type_data(client_type_string, time_iso_format):
     client_type_data.save()
 
 
-
-
-celery.conf.beat_schedule = {
-    'TSE daily crawl akhzas and arads': {
-        'task': 'tsetmc_daily_crawl_task',
-        'schedule': crontab(hour='20', minute='00')
-    },
-    'TSE client type data': {
-        'task': 'tsetmc_client_type_task',
-        'schedule': 5.0,
-    }
-}
+# celery.conf.beat_schedule = {
+#     'TSE daily crawl akhzas and arads': {
+#         'task': 'tsetmc_daily_crawl_task',
+#         'schedule': crontab(hour='20', minute='00')
+#     },
+#     'TSE client type data': {
+#         'task': 'tsetmc_client_type_task',
+#         'schedule': 5.0,
+#     }
+# }

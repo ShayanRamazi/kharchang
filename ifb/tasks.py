@@ -39,11 +39,11 @@ def ifb_daily_crawl():
             run_single_time_task.delay(ifb_crawl_task.id, ifb_crawl_task.get_class_name())
 
 
-celery.conf.beat_schedule = {
-    'IFB daily crawl akhzas and arads': {
-        'task': 'ifb_daily_crawl_task',
-        # 'schedule': crontab(hour='7, 8, 9, 12, 23', minute='0,30')
-        'schedule': crontab(hour='23, 22, 21, 20, 19', minute='20, 40')
-        # 'schedule': crontab(hour='2,4,6,8,10,12,14,16,18,20,22', minute='5, 15, 25, 35, 45, 55')
-    }
-}
+# celery.conf.beat_schedule = {
+#     'IFB daily crawl akhzas and arads': {
+#         'task': 'ifb_daily_crawl_task',
+#         # 'schedule': crontab(hour='7, 8, 9, 12, 23', minute='0,30')
+#         'schedule': crontab(hour='23, 22, 21, 20, 19', minute='20, 40')
+#         # 'schedule': crontab(hour='2,4,6,8,10,12,14,16,18,20,22', minute='5, 15, 25, 35, 45, 55')
+#     }
+# }

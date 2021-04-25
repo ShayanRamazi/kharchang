@@ -3,6 +3,8 @@ import os
 from celery import Celery
 
 # set the default Django settings module for the 'celery' program.
+from celery.schedules import crontab
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kharchang.settings')
 
 app = Celery('kharchang')
@@ -27,3 +29,19 @@ def ping():
     # type: () -> str
     """Simple task that just returns 'pong'."""
     return 'pong'
+
+
+app.conf.beat_schedule = {
+    'IFB daily crawl akhzas and arads': {
+        'task': 'ifb_daily_crawl_task',
+        'schedule': crontab(hour='23, 22, 21, 20, 19', minute='20, 40')
+    },
+    'TSE daily crawl akhzas and arads': {
+        'task': 'tsetmc_daily_crawl_task',
+        'schedule': crontab(hour='1, 20', minute='25, 56')
+    },
+    'TSE client type data': {
+        'task': 'tsetmc_client_type_task',
+        'schedule': 5.0,
+    }
+}
