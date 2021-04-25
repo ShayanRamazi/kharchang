@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='clienttypedata',
-            name='numberSellLegal',
+            name='numberSellRegal',
             field=models.BigIntegerField(),
         ),
         migrations.AlterField(
