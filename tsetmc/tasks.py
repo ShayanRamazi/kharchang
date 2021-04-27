@@ -79,7 +79,7 @@ def tsetmc_client_type_crawl():
     now = datetime.datetime.now()
     #  TODO: check this condition
     # logger.inf(str(now.hour)+":"+str(now.minute)+":"+str(now.seconds))
-    if now.hour > 17 or now.hour < 8:
+    if now.hour > 14 or now.hour < 8:
         return
     resp = requests.get(client_type_url)
     now_iso_format = now.isoformat()
