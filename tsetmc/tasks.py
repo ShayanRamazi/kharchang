@@ -78,6 +78,7 @@ def add_tsetmc_task(instrument_id, date):
 def tsetmc_client_type_crawl():
     now = datetime.datetime.now()
     #  TODO: check this condition
+    # logger.inf(str(now.hour)+":"+str(now.minute)+":"+str(now.seconds))
     if now.hour > 17 or now.hour < 8:
         return
     resp = requests.get(client_type_url)
@@ -93,7 +94,6 @@ def tsetmc_client_type_crawl():
         add_single_client_type_data.delay(client_type_string, now_iso_format)
 
 
-@transaction.atomic
 @celery.task(name="tsetmc_add_single_client_type_task")
 def add_single_client_type_data(client_type_string, time_iso_format):
     parts = client_type_string.split(",")
