@@ -50,3 +50,9 @@ pkill -f "celery beat"
 pkill -f "celery worker"
 nohup celery -A kharchang.celery worker --loglevel=info > celery_worker.out &
 nohup celery -A kharchang.celery beat --loglevel=info > celery_beat.out &
+
+celery -A kharchang.celery inspect stats
+
+
+virtual environment
+source venv/bin/activate
