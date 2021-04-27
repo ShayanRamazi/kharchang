@@ -36,6 +36,12 @@ https://gist.github.com/tomysmile/1b8a321e7c58499ef9f9441b2faa0aa8
 brew services start redis
 brew services stop redis
 
+
+useful commands :
+redis-cli
+    INFO keyspace
+    CONFIG GET databases
+    flushall
 **Celery**
 
 celery -A kharchang.celery worker --loglevel=info
@@ -50,3 +56,9 @@ pkill -f "celery beat"
 pkill -f "celery worker"
 nohup celery -A kharchang.celery worker --loglevel=info > celery_worker.out &
 nohup celery -A kharchang.celery beat --loglevel=info > celery_beat.out &
+
+celery -A kharchang.celery inspect stats
+
+
+virtual environment
+source venv/bin/activate

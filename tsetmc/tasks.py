@@ -2,7 +2,7 @@ import datetime
 import requests
 import redis
 import dateutil.parser
-from celery.schedules import crontab
+from django.db import transaction
 
 from core.utils import get_georgian_date_as_string_without_separator
 from kharchang import settings
@@ -66,7 +66,7 @@ def add_tsetmc_task(instrument_id, date):
             instrument_id, get_georgian_date_as_string_without_separator(date)),
         description=TseTmcCrawlTask.__name__ +
                     "Automatic crawl tse id:" + instrument_id
-                    + "date: " + get_georgian_date_as_string_without_separator(date)
+                    + " date: " + get_georgian_date_as_string_without_separator(date)
     )
     new_task.save()
     logger.info("Adding job for tsetmc_id: " + instrument_id
@@ -74,11 +74,11 @@ def add_tsetmc_task(instrument_id, date):
     run_single_time_task.delay(new_task.id, new_task.get_class_name())
 
 
-@celery.task(name="tsetmc_client_type_task")
+@celery.task(name="tsetmc_client_type_task", soft_time_limit=5)
 def tsetmc_client_type_crawl():
     now = datetime.datetime.now()
     #  TODO: check this condition
-    if now.hour > 14 or now.hour < 8:
+    if now.hour > 17 or now.hour < 8:
         return
     resp = requests.get(client_type_url)
     now_iso_format = now.isoformat()
@@ -87,19 +87,20 @@ def tsetmc_client_type_crawl():
         if len(parts) != 9:
             continue
         temp_value = redis_instance.get(CLIENT_TYPE_REDIS_PREFIX + parts[0])
-        if temp_value == client_type_string:
+        if temp_value == client_type_string.encode():
             continue
         redis_instance.set(CLIENT_TYPE_REDIS_PREFIX + parts[0], client_type_string)
         add_single_client_type_data.delay(client_type_string, now_iso_format)
 
 
+@transaction.atomic
 @celery.task(name="tsetmc_add_single_client_type_task")
 def add_single_client_type_data(client_type_string, time_iso_format):
     parts = client_type_string.split(",")
-    datetime = dateutil.parser.parse(time_iso_format)
+    date_time = dateutil.parser.parse(time_iso_format)
     client_type_data = MiddleDayClientTypeData()
-    client_type_data.date = datetime.date()
-    client_type_data.time = datetime.time()
+    client_type_data.date = date_time.date()
+    client_type_data.time = date_time.time()
     client_type_data.instrumentId = parts[0]
     client_type_data.numberBuyReal = parts[1]
     client_type_data.numberBuyLegal = parts[2]
@@ -110,15 +111,3 @@ def add_single_client_type_data(client_type_string, time_iso_format):
     client_type_data.volumeSellReal = parts[7]
     client_type_data.volumeSellLegal = parts[8]
     client_type_data.save()
-
-
-# celery.conf.beat_schedule = {
-#     'TSE daily crawl akhzas and arads': {
-#         'task': 'tsetmc_daily_crawl_task',
-#         'schedule': crontab(hour='20', minute='00')
-#     },
-#     'TSE client type data': {
-#         'task': 'tsetmc_client_type_task',
-#         'schedule': 5.0,
-#     }
-# }
