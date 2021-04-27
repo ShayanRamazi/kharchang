@@ -38,7 +38,7 @@ app.conf.beat_schedule = {
     },
     'TSE daily crawl instruments': {
         'task': 'tsetmc_daily_crawl_task',
-        'schedule': crontab(hour='2, 22', minute='35, 6')
+        'schedule': crontab(hour='2, 18', minute='0')
     },
     'TSE client type data': {
         'task': 'tsetmc_client_type_task',

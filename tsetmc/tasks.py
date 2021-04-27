@@ -24,10 +24,14 @@ CLIENT_TYPE_REDIS_PREFIX = "ctd__"
 
 @celery.task(name="tsetmc_daily_crawl_task")
 def tsetmc_daily_crawl():
+    task_counter = 0
     logger.info("Get Instruments list")
     # get tse instruments list
-    tse_instrument_id_list = get_instrument_id_list_from_tsetmc()[:10]
+    tse_instrument_id_list = get_instrument_id_list_from_tsetmc()
     for instrument_id in tse_instrument_id_list:
+        if task_counter > 20000:
+            logger.info("More than 20000 tasks added! I think that's enough for today!")
+            return
         logger.info("Get date list for " + str(instrument_id))
         # get dates to crawl for each instrument in descending order
         dates_list = get_instrument_dates_to_crawl(instrument_id)
@@ -47,6 +51,7 @@ def tsetmc_daily_crawl():
             temp_date = dates_list[dates_list_index]
             while temp_date >= task.dateToCrawl:
                 if temp_date != task.dateToCrawl:
+                    task_counter += 1
                     add_tsetmc_task(instrument_id, temp_date)
                 dates_list_index += 1
                 if dates_list_index >= len(dates_list):
@@ -54,6 +59,7 @@ def tsetmc_daily_crawl():
                 temp_date = dates_list[dates_list_index]
 
         for i in range(dates_list_index, len(dates_list)):
+            task_counter += 1
             add_tsetmc_task(instrument_id, dates_list[i])
 
 
