@@ -26,7 +26,7 @@ CLIENT_TYPE_REDIS_PREFIX = "ctd__"
 def tsetmc_daily_crawl():
     logger.info("Get Instruments list")
     # get tse instruments list
-    tse_instrument_id_list = get_instrument_id_list_from_tsetmc()
+    tse_instrument_id_list = get_instrument_id_list_from_tsetmc()[:10]
     for instrument_id in tse_instrument_id_list:
         logger.info("Get date list for " + str(instrument_id))
         # get dates to crawl for each instrument in descending order
