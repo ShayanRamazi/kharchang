@@ -1,8 +1,19 @@
+High priority
+TODO: Manage celery queues
+TODO: Dockerize, automatic testing and deployment
+TODO: BUGS: There are multiple tasks on the server with state R, how are these generated? During kill process or some other weird behaviour
+TODO: BUGS: Worker gets stuck when ifbcrawltask is running!
+
+
+Medium Priority
 TODO: Write some background job to execute waiting jobs with start time reached
-TODO: Write some periodic tasks
 TODO: Admin pages for tasks
-TODO: API documentation
 TODO: Task for update IFB.
 مثال: اخزا۹۱۵ ابتدا به صورت اخزا۹۱۵۱ خوانده می‌شود. بعدا باید اسم آن آپدیت شود.
 TODO: Complete ifb test cases
-TODO: Celery time zone
+TODO: provide a live database of market data using redis in order to be able to use filters
+
+
+Low Priority
+TODO: API documentation
+TODO: Add code coverage to tests

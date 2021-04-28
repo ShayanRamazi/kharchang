@@ -80,7 +80,7 @@ def add_tsetmc_task(instrument_id, date):
     run_single_time_task.delay(new_task.id, new_task.get_class_name())
 
 
-@celery.task(name="tsetmc_client_type_task", soft_time_limit=5)
+@celery.task(name="tsetmc_client_type_task")
 def tsetmc_client_type_crawl():
     now = datetime.datetime.now()
     #  TODO: check this condition
@@ -94,9 +94,15 @@ def tsetmc_client_type_crawl():
         if len(parts) != 9:
             continue
         temp_value = redis_instance.get(CLIENT_TYPE_REDIS_PREFIX + parts[0])
-        if temp_value == client_type_string.encode():
+        temp_value = temp_value if temp_value else b""
+        last_5_values = temp_value.decode().split(";")
+        if client_type_string in last_5_values:
             continue
-        redis_instance.set(CLIENT_TYPE_REDIS_PREFIX + parts[0], client_type_string)
+        last_5_values.append(client_type_string)
+        if len(last_5_values) > 5:
+            last_5_values = last_5_values[1:6]
+        last_5_values_string = ";".join(last_5_values)
+        redis_instance.set(CLIENT_TYPE_REDIS_PREFIX + parts[0], last_5_values_string)
         add_single_client_type_data.delay(client_type_string, now_iso_format)
 
 
