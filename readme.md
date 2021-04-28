@@ -19,6 +19,13 @@ simple: mongod --config /usr/local/etc/mongod.conf
 
 brew services start postgresql
 
+pg_lsclusters
+pg_ctlcluster
+sudo systemctl start postgresql
+
+database files:
+/var/lib/postgresql/13/main
+
 **Redis:**
 
 redis-cli ping
