@@ -3,6 +3,7 @@ DONE: TODO: Manage celery queues
 TODO: BUGS: There are multiple tasks on the server with state R, how are these generated? During kill process or some other weird behaviour
 TODO: BUGS: Worker gets stuck when ifbcrawltask is running!
 TODO: Dockerize, automatic testing and deployment
+TODO: Timing of tasks. Task time on the server is using UTC time for periodic tasks
 
 
 Medium Priority
