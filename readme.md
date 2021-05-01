@@ -46,10 +46,6 @@ https://gist.github.com/tomysmile/1b8a321e7c58499ef9f9441b2faa0aa8
 brew services start redis
 brew services stop redis
 
-https://hub.docker.com/_/redis
-docker run --name some-redis -d redis
-docker run --name some-redis -d redis redis-server --appendonly yes
-docker exec -it some-redis sh
 
 useful commands :
 redis-cli
