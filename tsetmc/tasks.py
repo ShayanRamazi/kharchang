@@ -20,6 +20,7 @@ client_type_url = "http://www.tsetmc.com/tsev2/data/ClientTypeAll.aspx"
 redis_instance = redis.StrictRedis(host=settings.REDIS_HOST,
                                    port=settings.REDIS_PORT, db=0)
 CLIENT_TYPE_REDIS_PREFIX = "ctd__"
+DAILY_TSE_CRAWL_LIMIT_IN_EACH_RUN = 5000
 
 
 @celery.task(name="tsetmc_daily_crawl_task")
@@ -29,8 +30,8 @@ def tsetmc_daily_crawl():
     # get tse instruments list
     tse_instrument_id_list = get_instrument_id_list_from_tsetmc()
     for instrument_id in tse_instrument_id_list:
-        if task_counter > 20000:
-            logger.info("More than 20000 tasks added! I think that's enough for today!")
+        if task_counter > DAILY_TSE_CRAWL_LIMIT_IN_EACH_RUN:
+            logger.info("More than" + str(DAILY_TSE_CRAWL_LIMIT_IN_EACH_RUN) +  "tasks added! I think that's enough for this time!")
             return
         logger.info("Get date list for " + str(instrument_id))
         # get dates to crawl for each instrument in descending order
@@ -123,3 +124,13 @@ def add_single_client_type_data(client_type_string, time_iso_format):
     client_type_data.volumeSellReal = parts[7]
     client_type_data.volumeSellLegal = parts[8]
     client_type_data.save()
+
+
+# @transaction.atomic()
+# def remove_redundant_client_type_records(instrumentId, date):
+#     all_records = MiddleDayClientTypeData.objects.filter(instrumentId=instrumentId, date=date).sort()
+#     present_values = {}
+#     ids_to_delete
+#     for record in all_records:
+#         record_string =
+

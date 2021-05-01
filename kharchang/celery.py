@@ -44,11 +44,12 @@ def ping():
 app.conf.beat_schedule = {
     'IFB daily crawl akhzas and arads': {
         'task': 'ifb_daily_crawl_task',
-        'schedule': crontab(hour='23, 22, 21, 20, 19', minute='20, 40')
+        'schedule': crontab(hour='14', minute='0'),
+        'options': {'queue': QUEUES_LOW_PRIORITY},
     },
     'TSE daily crawl instruments': {
         'task': 'tsetmc_daily_crawl_task',
-        'schedule': crontab(hour='2, 18', minute='0')
+        'schedule': crontab(hour='16, 0', minute='0')
     },
     'TSE client type data': {
         'task': 'tsetmc_client_type_task',
