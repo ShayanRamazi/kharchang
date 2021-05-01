@@ -20,7 +20,7 @@ client_type_url = "http://www.tsetmc.com/tsev2/data/ClientTypeAll.aspx"
 redis_instance = redis.StrictRedis(host=settings.REDIS_HOST,
                                    port=settings.REDIS_PORT, db=0)
 CLIENT_TYPE_REDIS_PREFIX = "ctd__"
-DAILY_TSE_CRAWL_LIMIT_IN_EACH_RUN = 5000
+DAILY_TSE_CRAWL_LIMIT_IN_EACH_RUN = 3000
 
 
 @celery.task(name="tsetmc_daily_crawl_task")
