@@ -140,6 +140,8 @@ class CrawlTask(BaseTask):
         insertion_result = self.__insert_data_to_database__(parsed_data)
         if insertion_result != 1:
             raise RuntimeError(self.ERROR_MESSAGE_INSERTION_ERROR)
+        django_logger.info("data insertion ended:" + str(self.id) + ":" + (
+            self.description if self.description else "no description"))
         return insertion_result
 
 

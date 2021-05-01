@@ -64,7 +64,8 @@ celery -A kharchang.celery control shutdown
 
 pkill -f "celery beat"
 pkill -f "celery worker"
-nohup celery -A kharchang.celery worker --loglevel=info > celery_worker.out &
+
+[comment]: <> (nohup celery -A kharchang.celery worker --loglevel=info > celery_worker.out &)
 nohup celery -A kharchang.celery beat --loglevel=info > celery_beat.out &
 
 celery -A kharchang.celery inspect stats
@@ -73,6 +74,7 @@ celery -A kharchang.celery inspect stats
 virtual environment
 source venv/bin/activate
 
+nohup celery -A kharchang.celery beat --loglevel=info > celery_beat.out &
 nohup celery -A kharchang.celery worker -l info --autoscale 4,2  > celery_default_queue.out &
 nohup celery -A kharchang.celery worker -l info -Q low_priority --autoscale 2,1 > celery_low_priority_queue.out &
 nohup celery -A kharchang.celery worker -l info -Q high_priority --autoscale 8,4 > celery_high_priority_queue.out &
