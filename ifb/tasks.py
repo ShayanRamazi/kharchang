@@ -37,7 +37,7 @@ def ifb_daily_crawl():
             )
             ifb_crawl_task.save()
             logger.info("Adding job for fbid: " + inst['fbid'])
-            run_single_time_task.apply_async(queue_name=QUEUES_LOW_PRIORITY, args=(
+            run_single_time_task.apply_async(queue=QUEUES_LOW_PRIORITY, args=(
                 ifb_crawl_task, ifb_crawl_task.get_class_name(), QUEUES_LOW_PRIORITY))
             # run_single_time_task.delay(ifb_crawl_task.id, ifb_crawl_task.get_class_name())
 

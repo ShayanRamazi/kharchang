@@ -170,13 +170,12 @@ class TseTmcCrawlTask(CrawlTask):
         insert_list_to_database(share_holders)
         insert_list_to_database(trades)
         insert_list_to_database(client_type_list)
-        staticTreshholdData.save()
         insert_list_to_database(price_data_list)
         insert_list_to_database(buy_best_limits)
         insert_list_to_database(sell_best_limits)
         insert_list_to_database(instrument_state_data)
+        staticTreshholdData.save()
         return 1
-
 
 
 class TseTmcInstrument(BaseModel):

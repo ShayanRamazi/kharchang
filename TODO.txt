@@ -1,5 +1,6 @@
 High priority
 DONE: TODO: Manage celery queues
+TODO: BUGS: One TseTmcCrawlTask consist of many insertions to database, when an error or unexpected exit occurs data me become corrupted and checking that would be a problem
 TODO: BUGS: There are multiple tasks on the server with state R, how are these generated? During kill process or some other weird behaviour
 TODO: BUGS: Worker gets stuck when ifbcrawltask is running!
 TODO: Dockerize, automatic testing and deployment

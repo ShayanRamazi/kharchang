@@ -6,7 +6,7 @@ from django.db import transaction
 
 from core.utils import get_georgian_date_as_string_without_separator
 from kharchang import settings
-from kharchang.celery import app as celery
+from kharchang.celery import app as celery, QUEUES_LOW_PRIORITY
 from core.tasks import run_single_time_task
 from celery.utils.log import get_task_logger
 
@@ -104,7 +104,7 @@ def tsetmc_client_type_crawl():
             last_5_values = last_5_values[1:6]
         last_5_values_string = ";".join(last_5_values)
         redis_instance.set(CLIENT_TYPE_REDIS_PREFIX + parts[0], last_5_values_string)
-        add_single_client_type_data.delay(client_type_string, now_iso_format)
+        add_single_client_type_data.apply_async(queue=QUEUES_LOW_PRIORITY, args=(client_type_string, now_iso_format))
 
 
 @celery.task(name="tsetmc_add_single_client_type_task")
