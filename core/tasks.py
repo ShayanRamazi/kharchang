@@ -12,7 +12,7 @@ logger = get_task_logger(__name__)
 
 
 @celery.task(name="simple_task")
-def run_single_time_task(task_id, task_class_name):
+def run_single_time_task(task_id, task_class_name, queue_name="celery"):
     logger.info(task_id)
     # logger.info(task_class_name)
     # logger.info(task_class_name.lower())
@@ -33,13 +33,12 @@ def run_single_time_task(task_id, task_class_name):
     if res == 1:
         return 1
     elif res == 0 and task.retried < task.max_retry:
-        run_single_time_task.delay(task.id, task_class_name)
+        run_single_time_task.apply_async(queue=queue_name, args=(task.id, task_class_name, task_class_name))
         return 0
     elif res == 0 or -1:
         return 0
     else:
         raise ValueError("Task run should return -1,0 or 1")
-
 
 # @celery.task(name="check_task")
 # def check():

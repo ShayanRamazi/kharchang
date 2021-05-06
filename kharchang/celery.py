@@ -3,7 +3,12 @@ import os
 from celery import Celery
 
 # set the default Django settings module for the 'celery' program.
+from celery.schedules import crontab
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kharchang.settings')
+
+QUEUES_HIGH_PRIORITY = 'high_priority'
+QUEUES_LOW_PRIORITY = 'low_priority'
 
 app = Celery('kharchang')
 
@@ -15,6 +20,13 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
+app.conf.task_create_missing_queues = True
+
+
+app.conf.update(
+    result_expires=60,
+    task_acks_late=True,
+)
 
 
 @app.task(bind=True)
@@ -27,3 +39,21 @@ def ping():
     # type: () -> str
     """Simple task that just returns 'pong'."""
     return 'pong'
+
+
+app.conf.beat_schedule = {
+    'IFB daily crawl akhzas and arads': {
+        'task': 'ifb_daily_crawl_task',
+        'schedule': crontab(hour='8', minute='30'),
+        'options': {'queue': QUEUES_LOW_PRIORITY},
+    },
+    'TSE daily crawl instruments': {
+        'task': 'tsetmc_daily_crawl_task',
+        'schedule': crontab(hour='9, 13, 17, 21', minute='0')
+    },
+    'TSE client type data': {
+        'task': 'tsetmc_client_type_task',
+        'schedule': 2.0,
+        'options': {'queue': QUEUES_HIGH_PRIORITY},
+    }
+}
