@@ -2,33 +2,10 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 import datetime
-
+import time
 from core.utils import string_to_date
-from tsetmc.models import TseTmcCrawlTask, IntraTradeData, ClientTypeData, StaticTreshholdData
-
-
-# class TradeTest(TestCase):
-#
-#     def test_valid_create_trade(self):
-#         valid_trade = Trade(
-#             isin=2400322364771558,
-#             date=timezone.now(),
-#             volume=100,
-#             price=100
-#         )
-#         valid_trade.full_clean()
-#         valid_trade.save()
-#         self.assertIs(valid_trade.canceled, False)
-#
-#     def test_invalid_create_trade(self):
-#         invalid_trade = Trade(
-#             isin=2400322364771558,
-#             date=timezone.now(),
-#             volume=-10,
-#             price=100
-#         )
-#         # invalid_trade.save()
-#         self.assertRaises(ValidationError, invalid_trade.full_clean)
+from tsetmc.models import TseTmcCrawlTask, IntraTradeData, ClientTypeData, StaticTreshholdData, BestLimitBuyData, \
+    BestLimitSellData, InstrumentStateData
 
 
 class TseTmcCrawlTaskTest(TestCase):
@@ -71,7 +48,50 @@ class TseTmcCrawlTaskTest(TestCase):
         self.assertEqual(intra_trade_count, inserted_intra_trade_count)
         self.assertEqual(StaticTreshholdData.objects.filter(instrumentId="63917421733088077",
                                                             date=string_to_date("20090505")).count(), 1)
+    def test_instrument_check_time(self):
+        start_time = time.time()
+        vatejarat_crawl_task = TseTmcCrawlTask(
+            url="http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=65883838195688438&d=20210421",
+            instrumentId="65883838195688438",
+            dateToCrawl=string_to_date("20210421")
+        )
+        res = vatejarat_crawl_task.run()
+        print("--- %s seconds ---" % (time.time() - start_time))
+
+    def test_check_number_of_best_limits(self):
+        fameli_crawl_task = TseTmcCrawlTask(
+            url="http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=655060129740445&d=20210421",
+            instrumentId="655060129740445",
+            dateToCrawl=string_to_date("20210421")
+        )
+        res = fameli_crawl_task.run()
+        self.assertEqual(res, 1)
+        self.assertEqual(TseTmcCrawlTask.objects.filter(instrumentId="655060129740445").count(), 1)
+        best_limits = 7604
+        best_limits_buy = BestLimitBuyData.objects.filter(
+            instrumentId="655060129740445",
+            date=string_to_date("20210421")) \
+            .count()
+        best_limits_sell = BestLimitSellData.objects.filter(
+            instrumentId="655060129740445",
+            date=string_to_date("20210421")) \
+            .count()
+        self.assertGreaterEqual( best_limits_buy+best_limits_sell,best_limits)
+
 
     def test_successful_instrument_with_changing_state(self):
         # TODO: http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=35425587644337450&d=20210203
-        self.assertEqual(1, 1)
+        crawl_task = TseTmcCrawlTask(
+            url="http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=35425587644337450&d=20210203",
+            instrumentId="35425587644337450",
+            dateToCrawl=string_to_date("20210203")
+        )
+        res = crawl_task.run()
+        self.assertEqual(res, 1)
+        self.assertEqual(TseTmcCrawlTask.objects.filter(instrumentId="35425587644337450").count(), 1)
+        number_of_status = 6
+        number_of_status_saved = InstrumentStateData.objects.filter(
+            instrumentId="35425587644337450",
+            date=string_to_date("20210203")) \
+            .count()
+        self.assertEqual(number_of_status, number_of_status_saved)

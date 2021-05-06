@@ -1,3 +1,5 @@
+import time
+
 from django.core.validators import MinValueValidator
 from django.db import models
 from core.models import BaseModel, CrawlTask
@@ -168,12 +170,12 @@ class TseTmcCrawlTask(CrawlTask):
         sell_best_limits = utils.create_historical_sell_best_limits_list(json_data["BestLimits"], argument_dict)
         insert_list_to_database(yesterday_share_holders)
         insert_list_to_database(share_holders)
-        insert_list_to_database(trades)
-        insert_list_to_database(client_type_list)
-        insert_list_to_database(price_data_list)
-        insert_list_to_database(buy_best_limits)
-        insert_list_to_database(sell_best_limits)
-        insert_list_to_database(instrument_state_data)
+        IntraTradeData.objects.bulk_create(trades)
+        InstrumentPriceData.objects.bulk_create(price_data_list)
+        ClientTypeData.objects.bulk_create(client_type_list)
+        BestLimitBuyData.objects.bulk_create(buy_best_limits)
+        BestLimitSellData.objects.bulk_create(sell_best_limits)
+        InstrumentStateData.objects.bulk_create(instrument_state_data)
         staticTreshholdData.save()
         return 1
 
