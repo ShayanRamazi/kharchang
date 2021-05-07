@@ -22,7 +22,6 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 app.conf.task_create_missing_queues = True
 
-
 app.conf.update(
     result_expires=60,
     task_acks_late=True,
@@ -49,11 +48,11 @@ app.conf.beat_schedule = {
     },
     'TSE daily crawl instruments': {
         'task': 'tsetmc_daily_crawl_task',
-        'schedule': crontab(hour='9, 13, 17, 21', minute='0')
+        'schedule': crontab(hour='9,20', minute='0')
     },
     'TSE client type data': {
         'task': 'tsetmc_client_type_task',
-        'schedule': 2.0,
+        'schedule': crontab(day_of_week='1,2,3,6,7', hour='4,5', minute='20'),
         'options': {'queue': QUEUES_HIGH_PRIORITY},
     }
 }

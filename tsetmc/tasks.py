@@ -1,4 +1,6 @@
 import datetime
+from time import sleep
+
 import requests
 import redis
 import dateutil.parser
@@ -21,6 +23,7 @@ redis_instance = redis.StrictRedis(host=settings.REDIS_HOST,
                                    port=settings.REDIS_PORT, db=0)
 CLIENT_TYPE_REDIS_PREFIX = "ctd__"
 DAILY_TSE_CRAWL_LIMIT_IN_EACH_RUN = 3000
+WAIT_TIME_UNTIL_NEXT_REQUEST = 0.5
 
 
 @celery.task(name="tsetmc_daily_crawl_task")
@@ -113,6 +116,8 @@ def tsetmc_client_type_crawl():
         last_5_values_string = ";".join(last_5_values)
         redis_instance.set(CLIENT_TYPE_REDIS_PREFIX + parts[0], last_5_values_string)
         add_single_client_type_data.apply_async(queue=QUEUES_HIGH_PRIORITY, args=(client_type_string, now_iso_format))
+    sleep(WAIT_TIME_UNTIL_NEXT_REQUEST)
+    tsetmc_client_type_crawl.apply_async(queue=QUEUES_HIGH_PRIORITY)
 
 
 @celery.task(name="tsetmc_add_single_client_type_task")
