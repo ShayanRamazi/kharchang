@@ -81,6 +81,7 @@ class TseTmcCrawlTaskTest(TestCase):
             .count()
         self.assertGreaterEqual(best_limits_buy + best_limits_sell, best_limits)
 
+
     def test_successful_instrument_with_changing_state(self):
         # TODO: http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=35425587644337450&d=20210203
         crawl_task = TseTmcCrawlTask(
