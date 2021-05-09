@@ -5,6 +5,9 @@ TODO: BUGS: There are multiple tasks on the server with state R, how are these g
 TODO: BUGS: Worker gets stuck when ifbcrawltask is running!
 TODO: Dockerize, automatic testing and deployment
 TODO: Timing of tasks. Task time on the server is using UTC time for periodic tasks
+TODO: Remove instrument-date data with incomplete data from database and queue
+TODO: Check if all done tasks have complete data
+TODO: Check why workers sometimes get stuck without any error message
 
 
 Medium Priority

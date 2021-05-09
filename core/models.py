@@ -145,6 +145,28 @@ class CrawlTask(BaseTask):
         return insertion_result
 
 
+class DatabaseLock(BaseModel):
+    lockKey = models.CharField(max_length=100, editable=False, unique=True, null=False, blank=False)
+    state = models.CharField(max_length=10)
+
+    @staticmethod
+    def lock_database_if_not_locked(key, state):
+        lock = DatabaseLock.objects.filter(lockKey=key)
+        if lock.exists():
+            return None
+        else:
+            lock = DatabaseLock(lockKey=key, state=state)
+            lock.save()
+        return lock
+
+    @staticmethod
+    def is_locked(key):
+        lock = DatabaseLock.objects.filter(lockKey=key)
+        if not lock.exists():
+            return False, None
+        else:
+            return True, lock[0].state
+
 #################################################
 #########        TEST CLASSES        ############
 #################################################

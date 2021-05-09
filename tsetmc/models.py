@@ -1,14 +1,16 @@
 import time
 
 from django.core.validators import MinValueValidator
-from django.db import models
-from core.models import BaseModel, CrawlTask
-from core.utils import insert_list_to_database
+from django.db import models, transaction, IntegrityError
+from core.models import BaseModel, CrawlTask, DatabaseLock
+from core.utils import insert_list_to_database, get_georgian_date_as_string_without_separator
 import logging
 import datetime
 import tsetmc.utils as utils
 
 django_logger = logging.getLogger(__name__)
+LOCK_STATE_INSERTION_STARTED = "INS_START"
+LOCK_STATE_INSERTION_ENDED = "INS_END"
 
 
 class ShareHolderData(BaseModel):
@@ -142,7 +144,13 @@ class TseTmcCrawlTask(CrawlTask):
         return utils.getJson(url), 1
 
     @staticmethod
+    @transaction.atomic
     def __insert_data_to_database__(json_data):
+        lock_key = json_data["instrumentId"] + "__" + get_georgian_date_as_string_without_separator(json_data["date"])
+        lock = DatabaseLock.lock_database_if_not_locked(lock_key, LOCK_STATE_INSERTION_STARTED)
+        if lock is None:
+            raise IntegrityError("data insertion for this pair of instrument and date is locked!(" + json_data[
+                "instrumentId"] + "," + get_georgian_date_as_string_without_separator(json_data["date"]) + ")")
         argument_dict = {
             'instrumentId': json_data["instrumentId"],
             'date': json_data["date"]
@@ -177,6 +185,8 @@ class TseTmcCrawlTask(CrawlTask):
         BestLimitSellData.objects.bulk_create(sell_best_limits)
         InstrumentStateData.objects.bulk_create(instrument_state_data)
         staticTreshholdData.save()
+        lock.state = LOCK_STATE_INSERTION_ENDED
+        lock.save()
         return 1
 
 

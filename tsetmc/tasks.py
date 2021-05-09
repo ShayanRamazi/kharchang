@@ -23,7 +23,7 @@ redis_instance = redis.StrictRedis(host=settings.REDIS_HOST,
                                    port=settings.REDIS_PORT, db=0)
 CLIENT_TYPE_REDIS_PREFIX = "ctd__"
 DAILY_TSE_CRAWL_LIMIT_IN_EACH_RUN = 3000
-WAIT_TIME_UNTIL_NEXT_REQUEST = 0.5
+WAIT_TIME_UNTIL_NEXT_REQUEST = 2
 
 
 @celery.task(name="tsetmc_daily_crawl_task")
@@ -97,7 +97,7 @@ def tsetmc_client_type_crawl():
     now = datetime.datetime.now()
     #  TODO: check this condition
     # logger.inf(str(now.hour)+":"+str(now.minute)+":"+str(now.seconds))
-    if now.hour > 14 or now.hour < 8:
+    if now.hour > 13 or now.hour < 8:
         return
     resp = requests.get(client_type_url)
     now_iso_format = now.isoformat()
@@ -118,6 +118,7 @@ def tsetmc_client_type_crawl():
         add_single_client_type_data.apply_async(queue=QUEUES_HIGH_PRIORITY, args=(client_type_string, now_iso_format))
     sleep(WAIT_TIME_UNTIL_NEXT_REQUEST)
     tsetmc_client_type_crawl.apply_async(queue=QUEUES_HIGH_PRIORITY)
+    return 1
 
 
 @celery.task(name="tsetmc_add_single_client_type_task")
@@ -137,6 +138,7 @@ def add_single_client_type_data(client_type_string, time_iso_format):
     client_type_data.volumeSellReal = parts[7]
     client_type_data.volumeSellLegal = parts[8]
     client_type_data.save()
+    return 1
 
 # @transaction.atomic()
 # def remove_redundant_client_type_records(instrumentId, date):

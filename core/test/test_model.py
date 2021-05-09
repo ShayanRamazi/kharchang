@@ -1,13 +1,14 @@
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
 
 from core.models import BaseTask, TestBaseClass, TestBaseTask, TestErrorBaseTask, TestBadValueBaseTask, \
     TestIOErrorBaseTask, CrawlTask, TestSuccessCrawlTask, TestParseFailInsertSuccessCrawlTask, \
     TestParseSuccessInsertFailCrawlTask, TestParseSuccessInsertBadValueCrawlTask, \
-    TestParseSuccessInsertRaiseErrorCrawlTask, TestParseRaiseErrorInsertSuccessCrawlTask
+    TestParseSuccessInsertRaiseErrorCrawlTask, TestParseRaiseErrorInsertSuccessCrawlTask, DatabaseLock
 
 
 class BaseModelTest(TestCase):
@@ -19,6 +20,26 @@ class BaseModelTest(TestCase):
         self.assertGreater(simple.created_at, time_1)
         i = TestBaseClass.objects.filter(name="test").count()
         self.assertEqual(i, 1)
+
+
+class DatabaseLockTest(TestCase):
+
+    def test_locking_logic(self):
+        exists, state = DatabaseLock.is_locked("1")
+        self.assertEqual(exists, False)
+        self.assertEqual(state, None)
+        lock = DatabaseLock.lock_database_if_not_locked("1", "S")
+        self.assertEqual(lock.lockKey, "1")
+        self.assertEqual(lock.state, "S")
+        exists, state = DatabaseLock.is_locked("1")
+        self.assertEqual(exists, True)
+        self.assertEqual(state, "S")
+        lock = DatabaseLock.lock_database_if_not_locked("1", "M")
+        self.assertIsNone(lock)
+        lock = DatabaseLock(lockKey="1")
+        # lock.save()
+        # self.assertEqual(DatabaseLock.objects.count(), 3)
+        self.assertRaises(IntegrityError, lock.save)
 
 
 class TaskTest(TestCase):
