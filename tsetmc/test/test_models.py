@@ -78,6 +78,16 @@ class TseTmcCrawlTaskTest(TestCase):
             .count()
         self.assertGreaterEqual( best_limits_buy+best_limits_sell,best_limits)
 
+    def test_empty_atrribute_in_model(self):
+        fameli_crawl_task = TseTmcCrawlTask(
+            url="http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=408934423224097&d=20040831",
+            instrumentId="408934423224097",
+            dateToCrawl=string_to_date("20040831")
+        )
+        res = fameli_crawl_task.run()
+        self.assertEqual(res, 1)
+        self.assertEqual(TseTmcCrawlTask.objects.filter(instrumentId="408934423224097").count(), 1)
+
 
     def test_successful_instrument_with_changing_state(self):
         # TODO: http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=35425587644337450&d=20210203
