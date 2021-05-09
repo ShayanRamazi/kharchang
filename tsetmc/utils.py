@@ -226,12 +226,31 @@ def jsonBestLimitData(bestLimitData):
 
 
 def jsonStaticTreshholdData(staticTreshholdData, instrumentPriceData, instSimpleData):
+    maxAllowed=-1
+    minAllowed=-1
+    baseVolume=-1
+    numberOfShares=-1
+    yesterdayPrice=-1
+    if(len(staticTreshholdData) != 0):
+        maxAllowed=staticTreshholdData[-1][-2]
+        minAllowed=staticTreshholdData[-1][-1]
+
+    if(len(instSimpleData) != 0):
+        baseVolume=instSimpleData[9]
+
+    if (len(instSimpleData) != 0):
+        baseVolume = instSimpleData[9]
+        numberOfShares=instSimpleData[8]
+
+    if (len(instrumentPriceData) != 0):
+        yesterdayPrice = instrumentPriceData[0][3]
+
     jsonStaticTreshholdData = {
-        "maxAllowed": staticTreshholdData[-1][-2],
-        "minAllowed": staticTreshholdData[-1][-1],
-        "baseVolume": instSimpleData[9],
-        "numberOfShares": instSimpleData[8],
-        "yesterdayPrice": instrumentPriceData[0][3]
+        "maxAllowed": maxAllowed,
+        "minAllowed": minAllowed,
+        "baseVolume": baseVolume,
+        "numberOfShares":numberOfShares ,
+        "yesterdayPrice": yesterdayPrice
     }
     return jsonStaticTreshholdData
 
