@@ -1,0 +1,9 @@
+TRUNCATE TABLE tsetmc_bestlimitbuydata;
+TRUNCATE TABLE tsetmc_bestlimitselldata;
+TRUNCATE TABLE tsetmc_clienttypedata;
+TRUNCATE TABLE tsetmc_instrumentpricedata;
+TRUNCATE TABLE tsetmc_instrumentstatedata;
+TRUNCATE TABLE tsetmc_intratradedata;
+TRUNCATE TABLE tsetmc_shareholderdata;
+TRUNCATE TABLE tsetmc_statictreshholddata;
+TRUNCATE TABLE tsetmc_tsetmcinstrument;

@@ -50,6 +50,8 @@ def tsetmc_daily_crawl():
             state__in=['Q', 'D']) \
             .values('dateToCrawl')
 
+        all_d_q_tse_tasks_dates_for_instrument = [x["dateToCrawl"] for x in all_d_q_tse_tasks_dates_for_instrument]
+
         logger.info("adding tasks")
         # added_dates = [task.dateToCrawl for task in all_d_q_tse_tasks_for_instrument]
         dates_to_add = [x for x in dates_list if x not in all_d_q_tse_tasks_dates_for_instrument]
