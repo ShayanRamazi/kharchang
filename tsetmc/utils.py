@@ -2,7 +2,6 @@ import datetime
 
 from django.contrib.contenttypes.models import ContentType
 from django.apps import apps
-import requests
 import tsetmc.models as models
 import re
 import ast
@@ -125,6 +124,7 @@ def jsonShareHolderDataYesterday(ShareHolderDataYesterday):
     shareHolderDataYesterdayJsonList = []
     for i in range(len(ShareHolderDataYesterday)):
         shareHolderDataYesterdayJson = {
+            "idShareHolder":ShareHolderDataYesterday[i][0],
             "name": ShareHolderDataYesterday[i][5],
             "isinShareHolder": ShareHolderDataYesterday[i][1],
             "percentage": ShareHolderDataYesterday[i][3],
@@ -138,6 +138,7 @@ def jsonShareHolderData(shareHolderData):
     shareHolderDataJsonList = []
     for i in range(len(shareHolderData)):
         shareHolderDataJson = {
+            "idShareHolder": shareHolderData[i][0],
             "name": shareHolderData[i][5],
             "isinShareHolder": shareHolderData[i][1],
             "percentage": shareHolderData[i][3],
@@ -148,6 +149,13 @@ def jsonShareHolderData(shareHolderData):
 
 
 def jsonIntraTradeData(intraTradeData):
+    # intraTradeData = [[*row] for row in list(zip(*intraTradeData))]
+    # intraTradeDataJson = {
+    #     "time": [ut.string_to_time_with_separator(x) for x in intraTradeData[1]],
+    #     "amount": intraTradeData[2],
+    #     "price": intraTradeData[3],
+    #     "canceled": intraTradeData[4]
+    # }
     intraTradeDataJsonList = []
     for i in range(len(intraTradeData)):
         intraTradeDataJson = {

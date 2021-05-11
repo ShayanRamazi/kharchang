@@ -1,5 +1,3 @@
-import time
-
 from django.core.validators import MinValueValidator
 from django.db import models, transaction, IntegrityError
 from core.models import BaseModel, CrawlTask, DatabaseLock
@@ -7,6 +5,7 @@ from core.utils import insert_list_to_database, get_georgian_date_as_string_with
 import logging
 import datetime
 import tsetmc.utils as utils
+from django_mysql.models import ListTextField
 
 django_logger = logging.getLogger(__name__)
 LOCK_STATE_INSERTION_STARTED = "INS_START"
@@ -14,6 +13,7 @@ LOCK_STATE_INSERTION_ENDED = "INS_END"
 
 
 class ShareHolderData(BaseModel):
+    idShareHolder=models.IntegerField(default=-1)
     date = models.DateField()
     instrumentId = models.CharField(max_length=30)
     isinShareHolder = models.CharField(max_length=20, null=False)
@@ -24,9 +24,9 @@ class ShareHolderData(BaseModel):
 
 
 class IntraTradeData(BaseModel):
-    date = models.DateField()
-    instrumentId = models.CharField(max_length=30)
-    time = models.TimeField(null=False)
+    date = models.DateField(null=True)
+    instrumentId = models.CharField(null=True,max_length=30)
+    time = models.TimeField(null=True)
     amount = models.PositiveIntegerField(null=False, validators=[MinValueValidator(1)])
     price = models.IntegerField(null=False, validators=[MinValueValidator(0)])
     canceled = models.BooleanField(default=False)
@@ -34,7 +34,6 @@ class IntraTradeData(BaseModel):
 
 class ClientTypeData(BaseModel):
     date = models.DateField()
-    # time = models.TimeField()
     instrumentId = models.CharField(max_length=30)
     numberBuyReal = models.BigIntegerField()
     volumeBuyReal = models.BigIntegerField()

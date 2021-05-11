@@ -50,7 +50,6 @@ class TseTmcCrawlTaskTest(TestCase):
         self.assertEqual(intra_trade_count, inserted_intra_trade_count)
         self.assertEqual(StaticTreshholdData.objects.filter(instrumentId="63917421733088077",
                                                             date=string_to_date("20090505")).count(), 1)
-
     def test_instrument_check_time(self):
         start_time = time.time()
         vatejarat_crawl_task = TseTmcCrawlTask(
@@ -80,6 +79,7 @@ class TseTmcCrawlTaskTest(TestCase):
             date=string_to_date("20210421")) \
             .count()
         self.assertGreaterEqual(best_limits_buy + best_limits_sell, best_limits)
+
 
     def test_successful_instrument_with_changing_state(self):
         # TODO: http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=35425587644337450&d=20210203
