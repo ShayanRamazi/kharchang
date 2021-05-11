@@ -14,12 +14,9 @@ logger = get_task_logger(__name__)
 @celery.task(name="simple_task")
 def run_single_time_task(task_id, task_class_name, queue_name="celery"):
     logger.info(task_id)
-    # logger.info(task_class_name)
-    # logger.info(task_class_name.lower())
     z = ContentType.objects.get(model=task_class_name.lower())
     TaskClass = apps.get_model(z.app_label, task_class_name)
     task = TaskClass.objects.get(id=task_id)
-    # task = CrawlTask.objects.get(id="60731d39b41fd894c596bb84")
     if task.state == BaseTask.STATE_ERROR or task.state == BaseTask.STATE_DONE:
         return -1
     if task.state == BaseTask.STATE_RUNNING:
@@ -33,7 +30,7 @@ def run_single_time_task(task_id, task_class_name, queue_name="celery"):
     if res == 1:
         return 1
     elif res == 0 and task.retried < task.max_retry:
-        run_single_time_task.apply_async(queue=queue_name, args=(task.id, task_class_name, task_class_name))
+        run_single_time_task.apply_async(queue=queue_name, args=(task.id, task_class_name, queue_name))
         return 0
     elif res == 0 or -1:
         return 0

@@ -81,7 +81,6 @@ class TseTmcCrawlTaskTest(TestCase):
             .count()
         self.assertGreaterEqual(best_limits_buy + best_limits_sell, best_limits)
 
-
     def test_successful_instrument_with_changing_state(self):
         # TODO: http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=35425587644337450&d=20210203
         crawl_task = TseTmcCrawlTask(
@@ -126,7 +125,8 @@ class TseTmcCrawlTaskTest(TestCase):
 class TseTmcCrawlTaskInsertionMethodTest(TestCase):
 
     def test_atomicity(self):
-        json_data = TseTmcCrawlTask.__parse_url__("http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=35425587644337450&d=20210421")[0]
+        json_data = TseTmcCrawlTask.__parse_url__(
+            "http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=35425587644337450&d=20210421")[0]
         json_data["StaticTreshholdData"]["numberOfShares"] = "salam"
         # TseTmcCrawlTask.__insert_data_to_database__(json_data)
         self.assertRaises(ValueError, TseTmcCrawlTask.__insert_data_to_database__, json_data)

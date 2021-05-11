@@ -22,7 +22,7 @@ client_type_url = "http://www.tsetmc.com/tsev2/data/ClientTypeAll.aspx"
 redis_instance = redis.StrictRedis(host=settings.REDIS_HOST,
                                    port=settings.REDIS_PORT, db=0)
 CLIENT_TYPE_REDIS_PREFIX = "ctd__"
-DAILY_TSE_CRAWL_LIMIT_IN_EACH_RUN = 3000
+DAILY_TSE_CRAWL_LIMIT_IN_EACH_RUN = 5000
 WAIT_TIME_UNTIL_NEXT_REQUEST = 2
 
 
@@ -79,7 +79,7 @@ def add_tsetmc_task(instrument_id, date):
     new_task = TseTmcCrawlTask(
         instrumentId=instrument_id,
         dateToCrawl=date,
-        max_retry=3,
+        max_retry=5,
         url=base_url % (
             instrument_id, get_georgian_date_as_string_without_separator(date)),
         description=TseTmcCrawlTask.__name__ +

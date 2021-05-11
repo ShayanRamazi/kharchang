@@ -8,7 +8,8 @@ TODO: Timing of tasks. Task time on the server is using UTC time for periodic ta
 TODO: Remove instrument-date data with incomplete data from database and queue
 TODO: Check if all done tasks have complete data
 TODO: Check why workers sometimes get stuck without any error message
-
+TODO: Seen tasks with state Q and max-retry equal to retried!
+TODO: Add test for queue name!
 
 Medium Priority
 TODO: provide a live database of market data using redis in order to be able to use filters
@@ -18,6 +19,7 @@ TODO: Admin pages for tasks
 TODO: Task for update IFB.
 مثال: اخزا۹۱۵ ابتدا به صورت اخزا۹۱۵۱ خوانده می‌شود. بعدا باید اسم آن آپدیت شود.
 TODO: Complete ifb test cases
+TODO: Backup
 
 
 
