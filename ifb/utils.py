@@ -5,19 +5,19 @@ import re
 from core.utils import parse_simple_jalali_date, get_first_number_from_string
 
 
-def get_url(url):
+def get_url_parse_BS(url):
     response = requests.get(url)
     return BeautifulSoup(response.text, "html.parser")
 
 
 def ifb_td_get_value_by_title(title, tds):
     for td in tds:
-        if td.find(text=re.compile(title)):
+        if td.find_rows():
             return td.find_next_sibling().text.strip()
 
 
 def ifb_td_get_value_by_span_id(span_id, parsed_html):
-    span = parsed_html.find("span", {"id": span_id})
+    span = parsed_html.find_rows("span")
     if span is not None:
         return span.find_parent().find_next_sibling().text.strip()
     return None
@@ -116,7 +116,7 @@ def get_arad_list_from_ifb_site():
     arad_list = []
     base_url = 'https://www.ifb.ir/Instrumentsmfi.aspx?id='
     url = 'https://www.ifb.ir/ytm.aspx'
-    parsed_html = get_url(url)
+    parsed_html = get_url_parse_BS(url)
     arad_table = parsed_html.find("table", {"id": "ContentPlaceHolder1_grdytm"})
     links = arad_table.find_all("a")
     for link in links:

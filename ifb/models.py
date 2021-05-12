@@ -13,7 +13,7 @@ from core.utils import parse_simple_jalali_date, georgian_to_simple_jalali_strin
 
 from django_mysql.models import ListCharField, ListTextField
 
-from ifb.utils import get_url, get_table_data_by_keys, add_key_values_to_dict, get_table_data_by_ids, get_fbid_from_url, \
+from ifb.utils import get_url_parse_BS, get_table_data_by_keys, add_key_values_to_dict, get_table_data_by_ids, get_fbid_from_url, \
     post_by_payload
 
 import logging
@@ -197,7 +197,7 @@ class IFBCrawlTask(CrawlTask):
             "fbid": get_fbid_from_url(url),
         }
         django_logger.info("parsing for fbid:", instrument_data["fbid"])
-        parsed_html = get_url(url)
+        parsed_html = get_url_parse_BS(url)
         inst_tables = parsed_html.find_all("table", {"class": "insTable"})
 
         symbol_info_table = inst_tables[0]

@@ -234,21 +234,21 @@ def jsonBestLimitData(bestLimitData):
 
 
 def jsonStaticTreshholdData(staticTreshholdData, instrumentPriceData, instSimpleData):
-    maxAllowed=-1
-    minAllowed=-1
-    baseVolume=-1
-    numberOfShares=-1
-    yesterdayPrice=-1
-    if(len(staticTreshholdData) != 0):
-        maxAllowed=staticTreshholdData[-1][-2]
-        minAllowed=staticTreshholdData[-1][-1]
-
-    if(len(instSimpleData) != 0):
-        baseVolume=instSimpleData[9]
+    maxAllowed = -1
+    minAllowed = -1
+    baseVolume = -1
+    numberOfShares = -1
+    yesterdayPrice = -1
+    if (len(staticTreshholdData) != 0):
+        maxAllowed = staticTreshholdData[-1][-2]
+        minAllowed = staticTreshholdData[-1][-1]
 
     if (len(instSimpleData) != 0):
         baseVolume = instSimpleData[9]
-        numberOfShares=instSimpleData[8]
+
+    if (len(instSimpleData) != 0):
+        baseVolume = instSimpleData[9]
+        numberOfShares = instSimpleData[8]
 
     if (len(instrumentPriceData) != 0):
         yesterdayPrice = instrumentPriceData[0][3]
@@ -257,7 +257,7 @@ def jsonStaticTreshholdData(staticTreshholdData, instrumentPriceData, instSimple
         "maxAllowed": maxAllowed,
         "minAllowed": minAllowed,
         "baseVolume": baseVolume,
-        "numberOfShares":numberOfShares ,
+        "numberOfShares": numberOfShares,
         "yesterdayPrice": yesterdayPrice
     }
     return jsonStaticTreshholdData
@@ -304,3 +304,27 @@ def get_instrument_dates_to_crawl(instrumentId):
         verify=False)
     date_list = [ut.string_to_date(res.text.split(";")[i][0:8]) for i in range(len(res.text.split(";")) - 1)]
     return date_list
+
+
+def find_rows(soup):
+    rows = soup.find_all('tr')
+    report = [0] * len(rows)
+    n = 0
+    for row in rows:
+        list_body = []
+        for bady in row.find_all('td'):
+            bod = bady.text.replace('\n', '')
+            bod = bod.strip()
+            if len(bod) >= 1:
+                list_body.append(bod)
+        report[n] = list_body
+        n += 1
+    return report
+
+
+def get_id_from_url(url):
+    ids = re.findall("&i=+([0-9]*)", url)
+    if len(ids) > 0:
+        return ids[0]
+    else:
+        return None

@@ -6,6 +6,10 @@ import logging
 import datetime
 import tsetmc.utils as utils
 from django_mysql.models import ListTextField
+from ifb.utils import get_url_parse_BS, get_table_data_by_keys, add_key_values_to_dict, get_table_data_by_ids, \
+    get_fbid_from_url, \
+    post_by_payload
+from django_mysql.models import ListTextField
 
 django_logger = logging.getLogger(__name__)
 LOCK_STATE_INSERTION_STARTED = "INS_START"
@@ -190,24 +194,48 @@ class TseTmcCrawlTask(CrawlTask):
 
 
 class TseTmcInstrument(BaseModel):
-    FLOWS = [
-        (0, "عمومی، مشترک بین بورس و فرابورس"),
-        (1, "بورس",),
-        (2, "فرابورس"),
-        (3, "آتی"),
-        (4, "پایه فرابورس"),
-        (5, "پایه فرابورس(منتشر نمی شود)"),
-        (6, "بورس انرژی"),
-        (7, "بورس کالا")
-    ]
-    instrumentId = models.CharField(max_length=30)
-    isin = models.CharField(max_length=20)
-    symbolFa = models.CharField(max_length=20)
+    instrumentId = models.CharField(max_length=30, unique=True)
+    isin_12 = models.CharField(max_length=12)
+    isin_5 = models.CharField(max_length=5)
+    companyEn = models.CharField(max_length=50)
+    isin_company_4 = models.CharField(max_length=4)
+    companyFa = models.CharField(max_length=100)
+    symbolFa = models.CharField(max_length=50)
+    symbolFa_30 = models.CharField(max_length=30)
+    isin_company_12 = models.CharField(max_length=12)
+    market = models.CharField(max_length=50, null=True, blank=True)
+    Board_code = models.CharField(max_length=2)
+    industry_code = models.CharField(max_length=4)
     industry = models.CharField(max_length=50)
-    flow = models.SmallIntegerField(choices=FLOWS)
-    baseVolume = models.BigIntegerField()
-    eps = models.IntegerField()
-    pe = models.FloatField()
-    pe_group = models.FloatField()
-    totalShares = models.BigIntegerField()
-    cisin = models.CharField(max_length=20)
+    subIndustry_code = models.CharField(max_length=10)
+    subIndustry = models.CharField(max_length=50)
+
+
+class TseTmcIdentityCertificateCrawlTask(CrawlTask):
+    instrumentId = models.CharField(max_length=30)
+
+    @staticmethod
+    def __parse_url__(url):
+        soup = get_url_parse_BS(url)
+        identity_certificate = utils.find_rows(soup)
+        symbol_Identity_Certificate_keys = ["isin_12", "isin_5", "companyEn", "isin_company_4", "companyFa", "symbolFa",
+                                            "symbolFa_30", "isin_company_12", "market", "Board_code", "industry_code",
+                                            'industry', "subIndustry_code", "subIndustry"]
+        dict_Identity_Certificate_tsetmc = dict()
+        n = 0
+        for i in identity_certificate:
+            dict_Identity_Certificate_tsetmc[symbol_Identity_Certificate_keys[n]] = i[1]
+            n += 1
+        dict_Identity_Certificate_tsetmc['instrumentId'] = utils.get_id_from_url(url)
+        return dict_Identity_Certificate_tsetmc, 1
+
+    @staticmethod
+    def __insert_data_to_database__(json_data):
+        instrument = TseTmcInstrument(**json_data)
+        instrument.full_clean()
+        django_logger.info("saving to database:", instrument.instrumentId)
+        instrument.save()
+        return 1
+
+# from tsetmc.models import TseTmcIdentityCertificateCrawlTask
+# mytask = TseTmcIdentityCertificateCrawlTask(url="http://www.tsetmc.com/Loader.aspx?Partree=15131M&i=2400322364771558" , instrumentId="2400322364771558")

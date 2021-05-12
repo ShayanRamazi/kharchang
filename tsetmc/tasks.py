@@ -12,7 +12,7 @@ from kharchang.celery import app as celery, QUEUES_HIGH_PRIORITY
 from core.tasks import run_single_time_task
 from celery.utils.log import get_task_logger
 
-from tsetmc.models import TseTmcCrawlTask, MiddleDayClientTypeData
+from tsetmc.models import TseTmcCrawlTask, MiddleDayClientTypeData, TseTmcInstrument, TseTmcIdentityCertificateCrawlTask
 from tsetmc.utils import get_instrument_id_list_from_tsetmc, get_instrument_dates_to_crawl
 
 logger = get_task_logger(__name__)
@@ -141,6 +141,22 @@ def add_single_client_type_data(client_type_string, time_iso_format):
     client_type_data.volumeSellLegal = parts[8]
     client_type_data.save()
     return 1
+
+
+@celery.task(name="tsetmc_identity_certificate_tab_crawl_task")
+def tsetmc_identity_certificate_tab_crawl():
+    tse_instrument_id_list = get_instrument_id_list_from_tsetmc()
+    base_url = 'http://www.tsetmc.com/Loader.aspx?Partree=15131M&i='
+    instrument_in_db = TseTmcInstrument.objects.all().values("instrumentId")
+    ids_in_db = [x["instrumentId"] for x in instrument_in_db]
+    ids_to_crawl = [x for x in tse_instrument_id_list if x not in ids_in_db]
+    for id in ids_to_crawl:
+        url = base_url+str(id)
+        task = TseTmcIdentityCertificateCrawlTask(url=url, instrumentId=id)
+        run_single_time_task.delay(task.id, task.get_class_name())
+
+
+
 
 # @transaction.atomic()
 # def remove_redundant_client_type_records(instrumentId, date):
