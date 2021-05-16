@@ -39,8 +39,8 @@ def create_historical_buy_best_limits_list(best_limit_data, argument_dict):
         previous_record_of_row = find_previous_record_of_row(best_limit_data, i, row)
         if not previous_record_of_row or previous_record_of_row['buy_amount'] != amount or previous_record_of_row[
             'buy_vol'] != volume or previous_record_of_row['buy_price'] != price:
-            buy_best_limits.append(
-                models.BestLimitBuyData(time=time, row=row, amount=amount, volume=volume, price=price, **argument_dict))
+            buy_best_limits.append(best_limit_datum)
+            #   models.BestLimitBuyData(time=time, row=row, amount=amount, volume=volume, price=price, **argument_dict))
     return buy_best_limits
 
 
@@ -59,6 +59,7 @@ def create_historical_sell_best_limits_list(best_limit_data, argument_dict):
             sell_best_limits.append(
                 models.BestLimitSellData(time=time, row=row, amount=amount, volume=volume, price=price,
                                          **argument_dict))
+
     return sell_best_limits
 
 
@@ -149,23 +150,24 @@ def jsonShareHolderData(shareHolderData):
 
 
 def jsonIntraTradeData(intraTradeData):
-    # intraTradeData = [[*row] for row in list(zip(*intraTradeData))]
-    # intraTradeDataJson = {
-    #     "time": [ut.string_to_time_with_separator(x) for x in intraTradeData[1]],
-    #     "amount": intraTradeData[2],
-    #     "price": intraTradeData[3],
-    #     "canceled": intraTradeData[4]
-    # }
-    intraTradeDataJsonList = []
-    for i in range(len(intraTradeData)):
-        intraTradeDataJson = {
-            "time": ut.string_to_time_with_separator(intraTradeData[i][1]),
-            "amount": intraTradeData[i][2],
-            "price": intraTradeData[i][3],
-            "canceled": intraTradeData[i][4]
-        }
-        intraTradeDataJsonList.append(intraTradeDataJson)
-    return intraTradeDataJsonList
+    intraTradeData = [[*row] for row in list(zip(*intraTradeData))]
+    intraTradeDataJson = {
+        "time": [ut.string_to_time_with_separator(x) for x in intraTradeData[1]],
+        "amount": intraTradeData[2],
+        "price": intraTradeData[3],
+        "canceled": intraTradeData[4]
+    }
+    return intraTradeDataJson
+    # intraTradeDataJsonList = []
+    # for i in range(len(intraTradeData)):
+    #     intraTradeDataJson = {
+    #         "time": ut.string_to_time_with_separator(intraTradeData[i][1]),
+    #         "amount": intraTradeData[i][2],
+    #         "price": intraTradeData[i][3],
+    #         "canceled": intraTradeData[i][4]
+    #     }
+    #     intraTradeDataJsonList.append(intraTradeDataJson)
+    # return intraTradeDataJsonList
 
 
 def jsonClientTypeData(clientTypeData):

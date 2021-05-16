@@ -3,7 +3,6 @@ from django.db import models, transaction, IntegrityError
 from core.models import BaseModel, CrawlTask, DatabaseLock
 from core.utils import insert_list_to_database, get_georgian_date_as_string_without_separator
 import logging
-import datetime
 import tsetmc.utils as utils
 from django_mysql.models import ListTextField
 from ifb.utils import get_url_parse_BS, get_table_data_by_keys, add_key_values_to_dict, get_table_data_by_ids, \
@@ -28,12 +27,30 @@ class ShareHolderData(BaseModel):
 
 
 class IntraTradeData(BaseModel):
-    date = models.DateField(null=True)
-    instrumentId = models.CharField(null=True,max_length=30)
-    time = models.TimeField(null=True)
-    amount = models.PositiveIntegerField(null=False, validators=[MinValueValidator(1)])
-    price = models.IntegerField(null=False, validators=[MinValueValidator(0)])
-    canceled = models.BooleanField(default=False)
+    date = models.DateField()
+    instrumentId = models.CharField(max_length=30)
+    time = ListTextField(
+        base_field=models.CharField(null=False),
+        null=True, blank=True
+    )
+    amountList = ListTextField(
+        base_field=models.IntegerField(),
+        null=True, blank=True
+    )
+    priceList = ListTextField(
+        base_field=models.IntegerField(),
+        null=True, blank=True
+    )
+    canceledList = ListTextField(
+        base_field=models.IntegerField(),
+        null=True, blank=True
+    )
+    # date = models.DateField(null=True)
+    # instrumentId = models.CharField(null=True,max_length=30)
+    # time = models.TimeField(null=True)
+    # amount = models.PositiveIntegerField(null=False, validators=[MinValueValidator(1)])
+    # price = models.IntegerField(null=False, validators=[MinValueValidator(0)])
+    # canceled = models.BooleanField(default=False)
 
 
 class ClientTypeData(BaseModel):
@@ -91,21 +108,51 @@ class InstrumentPriceData(BaseModel):
 class BestLimitBuyData(BaseModel):
     date = models.DateField()
     instrumentId = models.CharField(max_length=30)
-    time = models.TimeField()
-    row = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-    amount = models.IntegerField()
-    volume = models.IntegerField()
-    price = models.IntegerField()
+    time = ListTextField(
+        base_field=models.CharField(null=False),
+        null=True, blank=True
+    )
+    row = ListTextField(
+        base_field=models.IntegerField(),
+        null=True, blank=True
+    )
+    amount = ListTextField(
+        base_field=models.IntegerField(),
+        null=True, blank=True
+    )
+    volume = ListTextField(
+        base_field=models.IntegerField(),
+        null=True, blank=True
+    )
+    price = ListTextField(
+        base_field=models.IntegerField(),
+        null=True, blank=True
+    )
 
 
 class BestLimitSellData(BaseModel):
     date = models.DateField()
     instrumentId = models.CharField(max_length=30)
-    time = models.TimeField()
-    row = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-    amount = models.IntegerField()
-    volume = models.IntegerField()
-    price = models.IntegerField()
+    time = ListTextField(
+        base_field=models.CharField(null=False),
+        null=True, blank=True
+    )
+    row = ListTextField(
+        base_field=models.IntegerField(),
+        null=True, blank=True
+    )
+    amount = ListTextField(
+        base_field=models.IntegerField(),
+        null=True, blank=True
+    )
+    volume = ListTextField(
+        base_field=models.IntegerField(),
+        null=True, blank=True
+    )
+    price = ListTextField(
+        base_field=models.IntegerField(),
+        null=True, blank=True
+    )
 
 
 class StaticTreshholdData(BaseModel):
@@ -158,19 +205,17 @@ class TseTmcCrawlTask(CrawlTask):
             'instrumentId': json_data["instrumentId"],
             'date': json_data["date"]
         }
-        # client_type_time_dict = {
-        #     'time': datetime.time(15, 0, 0)
-        # }
         start_true_dict = {"isStart": True}
-        # django_logger.info("creating models for id " + json_data["instrumentId"] + " date " + json_data["date"])
         yesterday_share_holders = utils.create_entity_list(json_data["ShareHolderYesterdayData"],
                                                            {**argument_dict, **start_true_dict},
                                                            ShareHolderData.__name__)
         instrument_state_data = utils.create_entity_list(json_data["InstrumentStateData"], argument_dict,
                                                          InstrumentStateData.__name__)
         share_holders = utils.create_entity_list(json_data["ShareHolderData"], argument_dict, ShareHolderData.__name__)
-        trades = utils.create_entity_list(json_data["IntraTradeData"], argument_dict, IntraTradeData.__name__)
+        # trades = utils.create_entity_list(json_data["IntraTradeData"], argument_dict, IntraTradeData.__name__)
         # client_type = ClientTypeData(**json_data["ClientTypeData"], **argument_dict, **client_type_time_dict)
+        trades = IntraTradeData(**json_data["IntraTradeData"], **argument_dict)
+
         staticTreshholdData = StaticTreshholdData(**json_data["StaticTreshholdData"], **argument_dict)
         price_data_list = utils.create_entity_list(json_data["InstrumentPriceData"], argument_dict,
                                                    InstrumentPriceData.__name__)
@@ -178,7 +223,9 @@ class TseTmcCrawlTask(CrawlTask):
                                                     argument_dict,
                                                     ClientTypeData.__name__)
         buy_best_limits = utils.create_historical_buy_best_limits_list(json_data["BestLimits"], argument_dict)
+
         sell_best_limits = utils.create_historical_sell_best_limits_list(json_data["BestLimits"], argument_dict)
+
         insert_list_to_database(yesterday_share_holders)
         insert_list_to_database(share_holders)
         IntraTradeData.objects.bulk_create(trades)
