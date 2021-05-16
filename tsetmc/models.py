@@ -30,18 +30,18 @@ class IntraTradeData(BaseModel):
     date = models.DateField()
     instrumentId = models.CharField(max_length=30)
     time = ListTextField(
-        base_field=models.CharField(null=False),
+        base_field=models.CharField(null=False,max_length=30),
         null=True, blank=True
     )
-    amountList = ListTextField(
+    amount = ListTextField(
         base_field=models.IntegerField(),
         null=True, blank=True
     )
-    priceList = ListTextField(
+    price = ListTextField(
         base_field=models.IntegerField(),
         null=True, blank=True
     )
-    canceledList = ListTextField(
+    canceled = ListTextField(
         base_field=models.IntegerField(),
         null=True, blank=True
     )
@@ -92,24 +92,56 @@ class MiddleDayClientTypeData(BaseModel):
 class InstrumentPriceData(BaseModel):
     date = models.DateField()
     instrumentId = models.CharField(max_length=30)
-    time = models.TimeField()
-    lastTradePrice = models.IntegerField()
-    lastPrice = models.IntegerField()
-    firstPrice = models.IntegerField()
-    yesterdayPrice = models.IntegerField()
-    maxPrice = models.IntegerField()
-    minPrice = models.IntegerField()
-    numberOfTransactions = models.IntegerField()
-    turnover = models.BigIntegerField()
-    valueOfTransactions = models.BigIntegerField()
-    status = models.BooleanField(default=True)
-
+    time = ListTextField(
+        base_field=models.CharField(null=False,max_length=30),
+        null=True, blank=True
+    )
+    lastTradePrice = ListTextField(
+        base_field=models.CharField(null=False,max_length=30),
+        null=True, blank=True
+    )
+    lastPrice = ListTextField(
+        base_field=models.CharField(null=False,max_length=30),
+        null=True, blank=True
+    )
+    firstPrice = ListTextField(
+        base_field=models.CharField(null=False,max_length=30),
+        null=True, blank=True
+    )
+    yesterdayPrice = ListTextField(
+        base_field=models.CharField(null=False,max_length=30),
+        null=True, blank=True
+    )
+    maxPrice = ListTextField(
+        base_field=models.CharField(null=False,max_length=30),
+        null=True, blank=True
+    )
+    minPrice = ListTextField(
+        base_field=models.CharField(null=False,max_length=30),
+        null=True, blank=True
+    )
+    numberOfTransactions = ListTextField(
+        base_field=models.CharField(null=False,max_length=30),
+        null=True, blank=True
+    )
+    turnover = ListTextField(
+        base_field=models.CharField(null=False,max_length=30),
+        null=True, blank=True
+    )
+    valueOfTransactions = ListTextField(
+        base_field=models.CharField(null=False,max_length=30),
+        null=True, blank=True
+    )
+    status = ListTextField(
+        base_field=models.CharField(null=False,max_length=30),
+        null=True, blank=True
+    )
 
 class BestLimitBuyData(BaseModel):
     date = models.DateField()
     instrumentId = models.CharField(max_length=30)
     time = ListTextField(
-        base_field=models.CharField(null=False),
+        base_field=models.CharField(null=False,max_length=30),
         null=True, blank=True
     )
     row = ListTextField(
@@ -134,7 +166,7 @@ class BestLimitSellData(BaseModel):
     date = models.DateField()
     instrumentId = models.CharField(max_length=30)
     time = ListTextField(
-        base_field=models.CharField(null=False),
+        base_field=models.CharField(null=False,max_length=30),
         null=True, blank=True
     )
     row = ListTextField(
@@ -215,24 +247,28 @@ class TseTmcCrawlTask(CrawlTask):
         # trades = utils.create_entity_list(json_data["IntraTradeData"], argument_dict, IntraTradeData.__name__)
         # client_type = ClientTypeData(**json_data["ClientTypeData"], **argument_dict, **client_type_time_dict)
         trades = IntraTradeData(**json_data["IntraTradeData"], **argument_dict)
-
+        price_data_list = InstrumentPriceData(**json_data["InstrumentPriceData"], **argument_dict)
         staticTreshholdData = StaticTreshholdData(**json_data["StaticTreshholdData"], **argument_dict)
-        price_data_list = utils.create_entity_list(json_data["InstrumentPriceData"], argument_dict,
-                                                   InstrumentPriceData.__name__)
+        # price_data_list = utils.create_entity_list(json_data["InstrumentPriceData"], argument_dict,
+        #                                            InstrumentPriceData.__name__)
         client_type_list = utils.create_entity_list(json_data["ClientTypeData"],
                                                     argument_dict,
                                                     ClientTypeData.__name__)
-        buy_best_limits = utils.create_historical_buy_best_limits_list(json_data["BestLimits"], argument_dict)
-
-        sell_best_limits = utils.create_historical_sell_best_limits_list(json_data["BestLimits"], argument_dict)
-
+        buy_best_limits = utils.create_historical_buy_best_limits_list(json_data["BestLimits"])
+        buy_best_limits=BestLimitBuyData(**buy_best_limits,**argument_dict)
+        sell_best_limits = utils.create_historical_sell_best_limits_list(json_data["BestLimits"])
+        sell_best_limits = BestLimitSellData(**sell_best_limits, **argument_dict)
         insert_list_to_database(yesterday_share_holders)
         insert_list_to_database(share_holders)
-        IntraTradeData.objects.bulk_create(trades)
-        InstrumentPriceData.objects.bulk_create(price_data_list)
+        # IntraTradeData.objects.bulk_create(trades)
+        trades.save()
+        buy_best_limits.save()
+        sell_best_limits.save()
+        price_data_list.save()
+        # InstrumentPriceData.objects.bulk_create(price_data_list)
         ClientTypeData.objects.bulk_create(client_type_list)
-        BestLimitBuyData.objects.bulk_create(buy_best_limits)
-        BestLimitSellData.objects.bulk_create(sell_best_limits)
+        #BestLimitBuyData.objects.bulk_create(buy_best_limits)
+        #BestLimitSellData.objects.bulk_create(sell_best_limits)
         InstrumentStateData.objects.bulk_create(instrument_state_data)
         staticTreshholdData.save()
         lock.state = LOCK_STATE_INSERTION_ENDED

@@ -27,7 +27,7 @@ def find_previous_record_of_row(best_limit_data, index, row):
     return None
 
 
-def create_historical_buy_best_limits_list(best_limit_data, argument_dict):
+def create_historical_buy_best_limits_list(best_limit_data):
     buy_best_limits = []
     for i in range(len(best_limit_data)):
         best_limit_datum = best_limit_data[i]
@@ -40,11 +40,23 @@ def create_historical_buy_best_limits_list(best_limit_data, argument_dict):
         if not previous_record_of_row or previous_record_of_row['buy_amount'] != amount or previous_record_of_row[
             'buy_vol'] != volume or previous_record_of_row['buy_price'] != price:
             buy_best_limits.append(best_limit_datum)
-            #   models.BestLimitBuyData(time=time, row=row, amount=amount, volume=volume, price=price, **argument_dict))
-    return buy_best_limits
+            #models.BestLimitBuyData(time=time, row=row, amount=amount, volume=volume, price=price, **argument_dict))
+    time = [value['time'] for value in buy_best_limits]
+    row = [value['row'] for value in buy_best_limits]
+    buy_amount = [value['buy_amount'] for value in buy_best_limits]
+    buy_vol = [value['buy_vol'] for value in buy_best_limits]
+    buy_price = [value['buy_price'] for value in buy_best_limits]
+    json_ = {
+        "time": time,
+        "row": row,
+        "amount": buy_amount,
+        "volume": buy_vol,
+        "price": buy_price
+    }
+    return json_
 
 
-def create_historical_sell_best_limits_list(best_limit_data, argument_dict):
+def create_historical_sell_best_limits_list(best_limit_data):
     sell_best_limits = []
     for i in range(len(best_limit_data)):
         best_limit_datum = best_limit_data[i]
@@ -56,11 +68,21 @@ def create_historical_sell_best_limits_list(best_limit_data, argument_dict):
         previous_record_of_row = find_previous_record_of_row(best_limit_data, i, row)
         if not previous_record_of_row or previous_record_of_row['sell_amount'] != amount or previous_record_of_row[
             'sell_vol'] != volume or previous_record_of_row['sell_price'] != price:
-            sell_best_limits.append(
-                models.BestLimitSellData(time=time, row=row, amount=amount, volume=volume, price=price,
-                                         **argument_dict))
+            sell_best_limits.append(best_limit_datum)
+    time = [value['time'] for value in sell_best_limits]
+    row = [value['row'] for value in sell_best_limits]
+    buy_amount = [value['buy_amount'] for value in sell_best_limits]
+    buy_vol = [value['buy_vol'] for value in sell_best_limits]
+    buy_price = [value['buy_price'] for value in sell_best_limits]
+    json_ = {
+        "time": time,
+        "row": row,
+        "amount": buy_amount,
+        "volume": buy_vol,
+        "price": buy_price
+    }
 
-    return sell_best_limits
+    return json_
 
 
 def getHtml(url):
@@ -199,23 +221,37 @@ def jsonClientTypeData(clientTypeData):
 
 
 def jsonClosingPriceData(closingPriceData):
-    closingPriceDataJsonList = []
-    for i in range(len(closingPriceData)):
-        closingPriceDataJson = {
-            "time": ut.string_to_time_and_date(closingPriceData[i][0])[1],
-            "lastTradePrice": closingPriceData[i][2],
-            "lastPrice": closingPriceData[i][3],
-            "firstPrice": closingPriceData[i][4],
-            "yesterdayPrice": closingPriceData[i][5],
-            "maxPrice": closingPriceData[i][6],
-            "minPrice": closingPriceData[i][7],
-            "numberOfTransactions": closingPriceData[i][8],
-            "turnover": closingPriceData[i][9],
-            "valueOfTransactions": closingPriceData[i][10],
-            "status": closingPriceData[i][11]
-        }
-        closingPriceDataJsonList.append(closingPriceDataJson)
-    return closingPriceDataJsonList
+    closingPriceData = [[*row] for row in list(zip(*closingPriceData))]
+    closingPriceDataJson = {
+            "time": [ut.string_to_time_and_date(x)[0] for x in closingPriceData[0]],
+            "lastTradePrice": closingPriceData[2],
+            "lastPrice": closingPriceData[3],
+            "firstPrice": closingPriceData[4],
+            "yesterdayPrice": closingPriceData[5],
+            "maxPrice": closingPriceData[6],
+            "minPrice": closingPriceData[7],
+            "numberOfTransactions": closingPriceData[8],
+            "turnover": closingPriceData[9],
+            "valueOfTransactions": closingPriceData[10],
+            "status": closingPriceData[11]
+    }
+    # closingPriceDataJsonList = []
+    # for i in range(len(closingPriceData)):
+    #     closingPriceDataJson = {
+    #         "time": ut.string_to_time_and_date(closingPriceData[i][0])[1],
+    #         "lastTradePrice": closingPriceData[i][2],
+    #         "lastPrice": closingPriceData[i][3],
+    #         "firstPrice": closingPriceData[i][4],
+    #         "yesterdayPrice": closingPriceData[i][5],
+    #         "maxPrice": closingPriceData[i][6],
+    #         "minPrice": closingPriceData[i][7],
+    #         "numberOfTransactions": closingPriceData[i][8],
+    #         "turnover": closingPriceData[i][9],
+    #         "valueOfTransactions": closingPriceData[i][10],
+    #         "status": closingPriceData[i][11]
+    #     }
+    #     closingPriceDataJsonList.append(closingPriceDataJson)
+    return closingPriceDataJson
 
 
 def jsonBestLimitData(bestLimitData):

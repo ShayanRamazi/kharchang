@@ -156,8 +156,6 @@ def tsetmc_identity_certificate_tab_crawl():
         run_single_time_task.delay(task.id, task.get_class_name())
 
 
-
-
 # @transaction.atomic()
 # def remove_redundant_client_type_records(instrumentId, date):
 #     all_records = MiddleDayClientTypeData.objects.filter(instrumentId=instrumentId, date=date).sort()

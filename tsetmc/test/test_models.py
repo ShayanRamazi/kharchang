@@ -53,9 +53,9 @@ class TseTmcCrawlTaskTest(TestCase):
     def test_instrument_check_time(self):
         start_time = time.time()
         vatejarat_crawl_task = TseTmcCrawlTask(
-            url="http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=65883838195688438&d=20210421",
-            instrumentId="65883838195688438",
-            dateToCrawl=string_to_date("20210421")
+            url="http://cdn.tsetmc.com/Loader.aspx?ParTree=15131P&i=114312662654155&d=20210124",
+            instrumentId="114312662654155",
+            dateToCrawl=string_to_date("20210124")
         )
         res = vatejarat_crawl_task.run()
         print("--- %s seconds ---" % (time.time() - start_time))
